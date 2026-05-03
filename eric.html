@@ -117,6 +117,21 @@
     .characteristics-table input[readonly] { background: transparent; }
     .full { grid-column: 1 / -1; }
     .status { font-family: Arial, sans-serif; font-size: .88rem; opacity: .9; }
+    .header-meta { display: grid; gap: 2px; text-align: right; font-family: Arial, sans-serif; font-size: .82rem; }
+    .home-link {
+      border: 1px solid rgba(255,255,255,.35);
+      background: #3f1a11;
+      color: white;
+      padding: 8px 10px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-family: Arial, sans-serif;
+      font-size: .9rem;
+    }
+    .home-link:hover { background: #5b2518; }
+    .saved-ok { color: #d8ffd8; }
+    .saving { color: #ffe8b0; }
+    .unsaved { color: #ffd0c8; }
     .small-note { color: var(--muted); font-size: .9rem; font-family: Arial, sans-serif; }
     .add-row-controls { max-width: 360px; }
     tfoot td { background: #f7ecd8; }
@@ -167,7 +182,7 @@
       body { background: white; }
       main { margin: 0; max-width: none; padding: 0; }
       .sheet { box-shadow: none; border: none; }
-      button, .file-label { display: none; }
+      button, .file-label, .home-link { display: none; }
     }
   </style>
 </head>
@@ -176,14 +191,18 @@
     <div class="bar">
       <h1>WFRP Character Sheet</h1>
       <div class="buttons">
-        <button onclick="saveSheet()">Save</button>
-        <button onclick="loadSheet()">Load</button>
+        <a class="home-link" href="index.html">← Home</a>
+        <button onclick="saveSheet()">Save Now</button>
+        <button onclick="loadSheet()">Reload</button>
         <button onclick="exportSheet()">Export JSON</button>
         <label class="file-label">Import JSON<input type="file" accept="application/json" onchange="importSheet(event)"></label>
         <button onclick="clearSheet()">Clear</button>
         <button onclick="window.print()">Print</button>
       </div>
-      <div id="status" class="status">Ready</div>
+      <div class="header-meta">
+        <div id="status" class="status">Ready</div>
+        <div id="lastEdited" class="status">Last edited: never</div>
+      </div>
     </div>
   </header>
 
@@ -1629,7 +1648,8 @@
       addSkillRow(tableName, {name, characteristic, advances: 0, notes: ""}, index, true);
       select.value = "";
       updateCalculatedFields();
-      setStatus(`Added ${name}. Add the specialisation in Notes.`);
+      setStatus(`Added ${name}. Add the specialisation in Notes.`, "unsaved", false);
+      scheduleAutoSave();
     }
 
     function getCustomSkillRows(tableName) {
@@ -1743,6 +1763,7 @@
       });
       updateCalculatedFields();
       autoResizeNotes();
+      updateLastEdited(data._updatedAt);
     }
 
     function characteristicBonus(stat) {
@@ -1792,41 +1813,47 @@
       updateWeapons();
     }
 
-    async function saveSheet() {
+    async function saveSheet(options = {}) {
+      const { silent = false } = options;
       const data = collectSheet();
       data._updatedAt = new Date().toISOString();
       data._characterId = CHARACTER_ID;
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      updateLastEdited(data._updatedAt);
+      if (!silent) setStatus("Saving...", "saving", false);
 
       try {
         await db.collection(CLOUD_COLLECTION).doc(CHARACTER_ID).set(data, { merge: true });
-        setStatus(`Saved online as ${CHARACTER_ID}.`);
+        setStatus("Saved ✓", "saved-ok", false);
       } catch (err) {
         console.error(err);
-        setStatus("Online save failed. Saved backup in this browser only.");
+        setStatus("Online save failed. Browser backup saved only.", "unsaved", false);
       }
     }
 
     async function loadSheet() {
+      isLoadingSheet = true;
       try {
         const doc = await db.collection(CLOUD_COLLECTION).doc(CHARACTER_ID).get();
         if (doc.exists) {
           const data = doc.data();
           applySheet(data);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-          setStatus(`Loaded online sheet: ${CHARACTER_ID}.`);
+          setStatus("Loaded online sheet.", "saved-ok");
           return;
         }
       } catch (err) {
         console.error(err);
-        setStatus("Online load failed. Trying browser backup.");
+        setStatus("Online load failed. Trying browser backup.", "unsaved");
+      } finally {
+        isLoadingSheet = false;
       }
 
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return setStatus(`No online or browser save found for ${CHARACTER_ID}.`);
+      if (!saved) return setStatus(`No online or browser save found for ${CHARACTER_ID}.`, "unsaved");
       applySheet(JSON.parse(saved));
-      setStatus("Loaded browser backup.");
+      setStatus("Loaded browser backup.", "saved-ok");
     }
 
     function exportSheet() {
@@ -1852,7 +1879,7 @@
         try {
           applySheet(JSON.parse(reader.result));
           saveSheet();
-          setStatus("Imported and saved character JSON.");
+          setStatus("Imported character JSON. Saving...", "saving", false);
         } catch (err) {
           setStatus("Import failed: invalid JSON file.");
         }
@@ -1882,20 +1909,54 @@
       setStatus("Cleared sheet. Use Save to overwrite saved data.");
     }
 
-    function setStatus(message) {
-      document.getElementById("status").textContent = message;
-      setTimeout(() => document.getElementById("status").textContent = "Ready", 3500);
+    function formatTimestamp(isoString) {
+      if (!isoString) return "Last edited: never";
+      const date = new Date(isoString);
+      if (Number.isNaN(date.getTime())) return "Last edited: unknown";
+      return `Last edited: ${date.toLocaleString()}`;
+    }
+
+    function updateLastEdited(isoString) {
+      const el = document.getElementById("lastEdited");
+      if (el) el.textContent = formatTimestamp(isoString);
+    }
+
+    function setStatus(message, className = "", reset = true) {
+      const el = document.getElementById("status");
+      el.textContent = message;
+      el.className = `status ${className}`.trim();
+      if (reset) {
+        setTimeout(() => {
+          el.textContent = "Ready";
+          el.className = "status";
+        }, 3500);
+      }
+    }
+
+    function scheduleAutoSave() {
+      if (isLoadingSheet) return;
+      clearTimeout(autoSaveTimer);
+      setStatus("Unsaved changes...", "unsaved", false);
+      autoSaveTimer = setTimeout(() => saveSheet({ silent: true }), 900);
     }
 
     document.addEventListener("input", event => {
       if (event.target.matches('[data-field^="char"], [data-field^="adv"], [data-field="movement"], [data-field="strongBack"], [data-field*="Skills_"]')) updateCalculatedFields();
       if (event.target.matches('[data-field="notes"]')) autoResizeTextarea(event.target);
+      if (event.target.matches("[data-field]")) scheduleAutoSave();
+    });
+
+    document.addEventListener("change", event => {
+      if (event.target.matches("[data-field]")) {
+        updateCalculatedFields();
+        scheduleAutoSave();
+      }
     });
 
     initTables();
     updateCalculatedFields();
     autoResizeNotes();
-    setStatus(`Ready: ${CHARACTER_ID}`);
+    setStatus(`Ready: ${CHARACTER_ID}`, "", false);
     loadSheet();
   </script>
 </body>
