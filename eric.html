@@ -506,8 +506,33 @@
     </div>
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script>
-    const STORAGE_KEY = "wfrp-character-sheet-v1";
+    const firebaseConfig = {
+      apiKey: "AIzaSyAIZ1hiLFV60z4feJv0wC48dTrvApjuqjQ",
+      authDomain: "wfrp-enemy-within.firebaseapp.com",
+      projectId: "wfrp-enemy-within",
+      storageBucket: "wfrp-enemy-within.firebasestorage.app",
+      messagingSenderId: "349261927044",
+      appId: "1:349261927044:web:b7bec0a8eb665ef5bf68d1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function getCharacterId() {
+      const params = new URLSearchParams(window.location.search);
+      const fromUrl = params.get("id") || params.get("character") || params.get("player");
+      if (fromUrl) return fromUrl.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+
+      const filename = (window.location.pathname.split("/").pop() || "character").replace(/\.html?$/i, "");
+      return (filename || "character").toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+    }
+
+    const CHARACTER_ID = getCharacterId();
+    const CLOUD_COLLECTION = "characters";
+    const STORAGE_KEY = `wfrp-character-sheet-${CHARACTER_ID}`;
 
     const defaultBasicSkills = [
       {name: "Art", characteristic: "Dex", advances: 0, notes: "Grouped"},
@@ -1767,16 +1792,41 @@
       updateWeapons();
     }
 
-    function saveSheet() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(collectSheet()));
-      setStatus("Saved in this browser.");
+    async function saveSheet() {
+      const data = collectSheet();
+      data._updatedAt = new Date().toISOString();
+      data._characterId = CHARACTER_ID;
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+      try {
+        await db.collection(CLOUD_COLLECTION).doc(CHARACTER_ID).set(data, { merge: true });
+        setStatus(`Saved online as ${CHARACTER_ID}.`);
+      } catch (err) {
+        console.error(err);
+        setStatus("Online save failed. Saved backup in this browser only.");
+      }
     }
 
-    function loadSheet() {
+    async function loadSheet() {
+      try {
+        const doc = await db.collection(CLOUD_COLLECTION).doc(CHARACTER_ID).get();
+        if (doc.exists) {
+          const data = doc.data();
+          applySheet(data);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          setStatus(`Loaded online sheet: ${CHARACTER_ID}.`);
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+        setStatus("Online load failed. Trying browser backup.");
+      }
+
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return setStatus("No saved sheet found in this browser.");
+      if (!saved) return setStatus(`No online or browser save found for ${CHARACTER_ID}.`);
       applySheet(JSON.parse(saved));
-      setStatus("Loaded saved sheet.");
+      setStatus("Loaded browser backup.");
     }
 
     function exportSheet() {
@@ -1845,6 +1895,8 @@
     initTables();
     updateCalculatedFields();
     autoResizeNotes();
+    setStatus(`Ready: ${CHARACTER_ID}`);
+    loadSheet();
   </script>
 </body>
 </html>
