@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WFRP Character Sheet</title>
+  <style>
+    :root {
+      --bg: #efe6d0;
+      --paper: #fff8e8;
+      --ink: #2b2118;
+      --muted: #6b5b4b;
+      --line: #c6ad86;
+      --accent: #7b2e1f;
+      --accent-dark: #512014;
+      --field: #fffdf5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--accent-dark);
+      color: white;
+      padding: 12px 18px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.25);
+    }
+    header .bar {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    h1 { margin: 0; font-size: 1.35rem; letter-spacing: .04em; }
+    main {
+      max-width: 1200px;
+      margin: 22px auto;
+      padding: 0 16px 40px;
+    }
+    .buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    button, .file-label {
+      border: 1px solid rgba(255,255,255,.35);
+      background: var(--accent);
+      color: white;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+      font-size: .9rem;
+      font-weight: normal;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+    button:hover, .file-label:hover { background: #913827; }
+    input[type="file"] { display: none; }
+    .sheet {
+      background: var(--paper);
+      border: 2px solid var(--line);
+      box-shadow: 0 8px 24px rgba(56, 39, 18, .2);
+      padding: 18px;
+    }
+    .grid { display: grid; gap: 14px; }
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    section {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.28);
+      padding: 12px;
+      border-radius: 10px;
+    }
+    section h2 {
+      margin: 0 0 10px;
+      color: var(--accent-dark);
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 4px;
+      letter-spacing: .05em;
+    }
+    label {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: .82rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--field);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 7px 8px;
+      font: 1rem Arial, sans-serif;
+    }
+    textarea { min-height: 78px; resize: vertical; }
+    textarea[data-field="notes"] { overflow: hidden; resize: none; min-height: 140px; }
+    table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; }
+    th, td { border: 1px solid var(--line); padding: 5px; text-align: left; }
+    th { background: #ead7b4; color: var(--accent-dark); font-size: .78rem; text-transform: uppercase; }
+    td input { border: 0; border-radius: 0; background: transparent; padding: 4px; }
+    .characteristics-table th:first-child { width: 120px; }
+    .characteristics-table tbody th { background: #f1dfbf; color: var(--accent-dark); font-size: .82rem; text-align: left; text-transform: none; }
+    input[readonly] { font-weight: bold; color: var(--accent-dark); background: #f4ead5; }
+    .characteristics-table input[readonly] { background: transparent; }
+    .full { grid-column: 1 / -1; }
+    .status { font-family: Arial, sans-serif; font-size: .88rem; opacity: .9; }
+    .small-note { color: var(--muted); font-size: .9rem; font-family: Arial, sans-serif; }
+    .add-row-controls { max-width: 360px; }
+    tfoot td { background: #f7ecd8; }
+    .stacked-lines { display: grid; gap: 10px; }
+    .skills-table, .weapons-table { table-layout: fixed; }
+    .skills-table col.skill-name { width: 28%; }
+    .skills-table col.skill-char { width: 16%; }
+    .skills-table col.skill-score { width: 14%; }
+    .skills-table col.skill-adv { width: 14%; }
+    .skills-table col.skill-total { width: 14%; }
+    .skills-table col.skill-notes { width: 14%; }
+    .weapons-table col.weapon-name { width: 22%; }
+    .weapons-table col.weapon-group { width: 10%; }
+    .weapons-table col.weapon-hands { width: 7%; }
+    .weapons-table col.weapon-enc { width: 6%; }
+    .weapons-table col.weapon-reach { width: 10%; }
+    .weapons-table col.weapon-damage { width: 8%; }
+    .weapons-table col.weapon-qualities { width: 18.5%; }
+    .weapons-table col.weapon-flaws { width: 18.5%; }
+    .weapons-table select { min-width: 145px; }
+
+    .record-table { table-layout: fixed; margin-bottom: 10px; }
+    .record-table th.section-title { background: #b9b1a5; color: #000; text-align: center; font-size: .9rem; letter-spacing: .03em; }
+    .record-table input { width: 100%; border: 0; border-radius: 0; background: transparent; padding: 3px 4px; min-height: 24px; }
+    .record-table col.armour-type { width: 26%; }
+    .record-table col.armour-enc { width: 10%; }
+    .record-table col.armour-ap { width: 10%; }
+    .record-table col.armour-location { width: 20%; }
+    .record-table col.armour-qf { width: 34%; }
+    .record-table col.trap-item { width: 26%; }
+    .record-table col.trap-enc { width: 10%; }
+    .record-table col.trap-desc { width: 64%; }
+    .record-table col.psych-type { width: 26%; }
+    .record-table col.psych-desc { width: 74%; }
+    .record-table col.spell-name { width: 26%; }
+    .record-table col.spell-cn { width: 10%; }
+    .record-table col.spell-range { width: 12%; }
+    .record-table col.spell-target { width: 12%; }
+    .record-table col.spell-duration { width: 12%; }
+    .record-table col.spell-effect { width: 28%; }
+
+    .record-table col.talent-name { width: 30%; }
+    .record-table col.talent-amount { width: 22%; }
+    .record-table col.talent-desc { width: 48%; }
+    @media (max-width: 900px) { .two, .three, .four { grid-template-columns: 1fr; } }
+    @media print {
+      header { display: none; }
+      body { background: white; }
+      main { margin: 0; max-width: none; padding: 0; }
+      .sheet { box-shadow: none; border: none; }
+      button, .file-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <h1>WFRP Character Sheet</h1>
+      <div class="buttons">
+        <button onclick="saveSheet()">Save</button>
+        <button onclick="loadSheet()">Load</button>
+        <button onclick="exportSheet()">Export JSON</button>
+        <label class="file-label">Import JSON<input type="file" accept="application/json" onchange="importSheet(event)"></label>
+        <button onclick="clearSheet()">Clear</button>
+        <button onclick="window.print()">Print</button>
+      </div>
+      <div id="status" class="status">Ready</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="sheet" id="sheet">
+      <div class="grid two">
+        <section>
+          <h2>Character Details</h2>
+          <div class="grid two">
+            <label>Name<input data-field="name" value="Wilt Philadelphia the Chamberlain"></label>
+            <label>Race<input data-field="race" value="Human"></label>
+            <label>Class<input data-field="class" value="Courtier"></label>
+            <label>Status<input data-field="status" value="Silver 1"></label>
+            <label>Current Career<input data-field="career" value="Servant, p. 74"></label>
+            <label>Career Level<input data-field="careerLevel" value="Tier 1"></label>
+            <label>Career Path<input data-field="careerPath" value="Menial"></label>
+            <label>Gender<input data-field="gender" value="Male"></label>
+            <label>Age<input data-field="age"></label>
+            <label>Height<input data-field="height"></label>
+            <label>Weight<input data-field="weight"></label>
+            <label>Birthplace<input data-field="birthplace" value="Townname, Middlenland"></label>
+            <label>Eye Color<input data-field="eyes"></label>
+            <label>Hair Color<input data-field="hair"></label>
+            <label>Star Sign<input data-field="starSign"></label>
+            <label>Distinguishing Marks<input data-field="marks"></label>
+          </div>
+        </section>
+
+        <section>
+          <h2>Experience, Fate & Money</h2>
+          <div class="stacked-lines">
+            <div class="grid three">
+              <label>Current XP<input type="number" data-field="xpCurrent" value="95"></label>
+              <label>Spent XP<input type="number" data-field="xpSpent" value="0"></label>
+              <label>Total XP<input type="number" data-field="xpTotal" value="95"></label>
+            </div>
+            <div class="grid two">
+              <label>Fate<input type="number" data-field="fate" value="3"></label>
+              <label>Fortune<input type="number" data-field="fortune" value="4"></label>
+            </div>
+            <div class="grid two">
+              <label>Resilience<input type="number" data-field="resilience" value="3"></label>
+              <label>Resolve<input type="number" data-field="resolve" value="4"></label>
+            </div>
+            <div class="grid three">
+              <label>Gold Crowns<input type="number" data-field="gold" value="0"></label>
+              <label>Shillings<input type="number" data-field="shillings" value="8"></label>
+              <label>Brass Pennies<input type="number" data-field="pennies" value="0"></label>
+            </div>
+          </div>
+          <p class="small-note">Exchange: 1 Gold Crown = 20 Shillings = 240 Brass Pennies.</p>
+        </section>
+
+        <section class="full">
+          <h2>Ambitions & Motivation</h2>
+          <div class="grid three">
+            <label>Short-Term Ambition<textarea data-field="shortAmbition"></textarea></label>
+            <label>Long-Term Ambition<textarea data-field="longAmbition"></textarea></label>
+            <label>Motivation<textarea data-field="motivation"></textarea></label>
+          </div>
+        </section>
+
+        <section>
+          <h2>Armour & Wounds</h2>
+          <div class="grid three">
+            <label>Head<input type="number" data-field="armourHead" value="0"></label>
+            <label>Body<input type="number" data-field="armourBody" value="0"></label>
+            <label>Right Arm<input type="number" data-field="armourRightArm" value="0"></label>
+            <label>Left Arm<input type="number" data-field="armourLeftArm" value="0"></label>
+            <label>Right Leg<input type="number" data-field="armourRightLeg" value="0"></label>
+            <label>Left Leg<input type="number" data-field="armourLeftLeg" value="0"></label>
+            <label>Current Wounds<input type="number" data-field="currentWounds" value="12"></label>
+            <label>Critical Wounds<input data-field="criticalWounds"></label>
+            <label>Shield Bonus<input type="number" data-field="shieldBonus" value="0"></label>
+          </div>
+        </section>
+
+        <section>
+          <h2>Movement & Encumbrance</h2>
+          <div class="grid two">
+            <label>Movement<input type="number" data-field="movement" value="4"></label>
+            <label>Walk<input type="number" data-field="walk" value="8" readonly></label>
+            <label>Run<input type="number" data-field="run" value="16" readonly></label>
+            <label>Max Encumbrance<input type="number" data-field="totalEnc" value="8" readonly></label>
+            <label>Total Encumbrance<input type="number" data-field="maxEnc" value="0"></label>
+            <label>Strong Back Bonus<input type="number" data-field="strongBack" value="0"></label>
+          </div>
+        </section>
+
+        <section class="full">
+          <h2>Characteristics</h2>
+          <table class="characteristics-table">
+            <thead>
+              <tr><th></th><th>WS</th><th>BS</th><th>S</th><th>T</th><th>I</th><th>Agi</th><th>Dex</th><th>Int</th><th>WP</th><th>Fel</th><th>W</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>Starting</th>
+                <td><input type="number" data-field="charWS" value="45"></td>
+                <td><input type="number" data-field="charBS" value="30"></td>
+                <td><input type="number" data-field="charS" value="45"></td>
+                <td><input type="number" data-field="charT" value="45"></td>
+                <td><input type="number" data-field="charI" value="30"></td>
+                <td><input type="number" data-field="charAgi" value="45"></td>
+                <td><input type="number" data-field="charDex" value="30"></td>
+                <td><input type="number" data-field="charInt" value="50"></td>
+                <td><input type="number" data-field="charWP" value="30"></td>
+                <td><input type="number" data-field="charFel" value="50"></td>
+                <td><input type="number" data-field="charW" value="15"></td>
+              </tr>
+              <tr>
+                <th>Advances</th>
+                <td><input type="number" data-field="advWS" value="0"></td>
+                <td><input type="number" data-field="advBS" value="0"></td>
+                <td><input type="number" data-field="advS" value="0"></td>
+                <td><input type="number" data-field="advT" value="0"></td>
+                <td><input type="number" data-field="advI" value="0"></td>
+                <td><input type="number" data-field="advAgi" value="0"></td>
+                <td><input type="number" data-field="advDex" value="0"></td>
+                <td><input type="number" data-field="advInt" value="0"></td>
+                <td><input type="number" data-field="advWP" value="0"></td>
+                <td><input type="number" data-field="advFel" value="0"></td>
+                <td><input type="number" data-field="advW" value="0"></td>
+              </tr>
+              <tr>
+                <th>Current</th>
+                <td><input type="number" data-field="curWS" readonly></td>
+                <td><input type="number" data-field="curBS" readonly></td>
+                <td><input type="number" data-field="curS" readonly></td>
+                <td><input type="number" data-field="curT" readonly></td>
+                <td><input type="number" data-field="curI" readonly></td>
+                <td><input type="number" data-field="curAgi" readonly></td>
+                <td><input type="number" data-field="curDex" readonly></td>
+                <td><input type="number" data-field="curInt" readonly></td>
+                <td><input type="number" data-field="curWP" readonly></td>
+                <td><input type="number" data-field="curFel" readonly></td>
+                <td><input type="number" data-field="curW" readonly></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="full">
+          <h2>Basic Skills</h2>
+          <table data-table="basicSkills" class="skills-table">
+            <colgroup>
+              <col class="skill-name">
+              <col class="skill-char">
+              <col class="skill-score">
+              <col class="skill-adv">
+              <col class="skill-total">
+              <col class="skill-notes">
+            </colgroup>
+            <thead><tr><th>Parent Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th></tr></thead>
+            <tbody></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="6">
+                  <div class="add-row-controls">
+                    <label>Add Basic Grouped Skill
+                      <select id="addBasicGroupedSkill" onchange="addSkillFromSelect('basicSkills', this)">
+                        <option value="">Choose a grouped skill...</option>
+                      </select>
+                    </label>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </section>
+
+        <section class="full">
+          <h2>Advanced Skills</h2>
+          <table data-table="advancedSkills" class="skills-table">
+            <colgroup>
+              <col class="skill-name">
+              <col class="skill-char">
+              <col class="skill-score">
+              <col class="skill-adv">
+              <col class="skill-total">
+              <col class="skill-notes">
+            </colgroup>
+            <thead><tr><th>Parent Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th></tr></thead>
+            <tbody></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="6">
+                  <div class="add-row-controls">
+                    <label>Add Advanced Skill
+                      <select id="addAdvancedSkill" onchange="addSkillFromSelect('advancedSkills', this)">
+                        <option value="">Choose an advanced skill...</option>
+                      </select>
+                    </label>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </section>
+
+        <section class="full">
+          <h2>Talents</h2>
+          <table class="record-table">
+            <colgroup>
+              <col class="talent-name"><col class="talent-amount"><col class="talent-desc">
+            </colgroup>
+            <thead>
+              <tr><th colspan="3" class="section-title">TALENTS, p. 132</th></tr>
+              <tr><th>Talent</th><th>Amount Taken</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><input data-field="talentsTable_0_0"></td><td><input data-field="talentsTable_0_1"></td><td><input data-field="talentsTable_0_2"></td></tr>
+              <tr><td><input data-field="talentsTable_1_0"></td><td><input data-field="talentsTable_1_1"></td><td><input data-field="talentsTable_1_2"></td></tr>
+              <tr><td><input data-field="talentsTable_2_0"></td><td><input data-field="talentsTable_2_1"></td><td><input data-field="talentsTable_2_2"></td></tr>
+              <tr><td><input data-field="talentsTable_3_0"></td><td><input data-field="talentsTable_3_1"></td><td><input data-field="talentsTable_3_2"></td></tr>
+              <tr><td><input data-field="talentsTable_4_0"></td><td><input data-field="talentsTable_4_1"></td><td><input data-field="talentsTable_4_2"></td></tr>
+              <tr><td><input data-field="talentsTable_5_0"></td><td><input data-field="talentsTable_5_1"></td><td><input data-field="talentsTable_5_2"></td></tr>
+              <tr><td><input data-field="talentsTable_6_0"></td><td><input data-field="talentsTable_6_1"></td><td><input data-field="talentsTable_6_2"></td></tr>
+              <tr><td><input data-field="talentsTable_7_0"></td><td><input data-field="talentsTable_7_1"></td><td><input data-field="talentsTable_7_2"></td></tr>
+              <tr><td><input data-field="talentsTable_8_0"></td><td><input data-field="talentsTable_8_1"></td><td><input data-field="talentsTable_8_2"></td></tr>
+              <tr><td><input data-field="talentsTable_9_0"></td><td><input data-field="talentsTable_9_1"></td><td><input data-field="talentsTable_9_2"></td></tr>
+              <tr><td><input data-field="talentsTable_10_0"></td><td><input data-field="talentsTable_10_1"></td><td><input data-field="talentsTable_10_2"></td></tr>
+              <tr><td><input data-field="talentsTable_11_0"></td><td><input data-field="talentsTable_11_1"></td><td><input data-field="talentsTable_11_2"></td></tr>
+              <tr><td><input data-field="talentsTable_12_0"></td><td><input data-field="talentsTable_12_1"></td><td><input data-field="talentsTable_12_2"></td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="full">
+          <h2>Weapons</h2>
+          <table data-table="weapons" class="weapons-table">
+            <colgroup>
+              <col class="weapon-name">
+              <col class="weapon-group">
+              <col class="weapon-hands">
+              <col class="weapon-enc">
+              <col class="weapon-reach">
+              <col class="weapon-damage">
+              <col class="weapon-qualities">
+              <col class="weapon-flaws">
+            </colgroup>
+            <thead><tr><th>Weapon</th><th>Group</th><th>1H/2H</th><th>Enc</th><th>Reach/Range</th><th>Damage</th><th>Qualities</th><th>Flaws / Notes</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </section>
+
+        <section class="full">
+          <h2>Armour</h2>
+          <table class="record-table">
+            <colgroup>
+              <col class="armour-type"><col class="armour-enc"><col class="armour-ap"><col class="armour-location"><col class="armour-qf">
+            </colgroup>
+            <thead>
+              <tr><th colspan="5" class="section-title">ARMOUR, p. 299 CR</th></tr>
+              <tr><th>Armour Type</th><th>Enc.</th><th>AP</th><th>Location</th><th>Qualities/Flaws</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><input data-field="armourTable_0_0"></td><td><input data-field="armourTable_0_1"></td><td><input data-field="armourTable_0_2"></td><td><input data-field="armourTable_0_3"></td><td><input data-field="armourTable_0_4"></td></tr>
+              <tr><td><input data-field="armourTable_1_0"></td><td><input data-field="armourTable_1_1"></td><td><input data-field="armourTable_1_2"></td><td><input data-field="armourTable_1_3"></td><td><input data-field="armourTable_1_4"></td></tr>
+              <tr><td><input data-field="armourTable_2_0"></td><td><input data-field="armourTable_2_1"></td><td><input data-field="armourTable_2_2"></td><td><input data-field="armourTable_2_3"></td><td><input data-field="armourTable_2_4"></td></tr>
+              <tr><td><input data-field="armourTable_3_0"></td><td><input data-field="armourTable_3_1"></td><td><input data-field="armourTable_3_2"></td><td><input data-field="armourTable_3_3"></td><td><input data-field="armourTable_3_4"></td></tr>
+              <tr><td><input data-field="armourTable_4_0"></td><td><input data-field="armourTable_4_1"></td><td><input data-field="armourTable_4_2"></td><td><input data-field="armourTable_4_3"></td><td><input data-field="armourTable_4_4"></td></tr>
+              <tr><td><input data-field="armourTable_5_0"></td><td><input data-field="armourTable_5_1"></td><td><input data-field="armourTable_5_2"></td><td><input data-field="armourTable_5_3"></td><td><input data-field="armourTable_5_4"></td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="full">
+          <h2>Psychology</h2>
+          <table class="record-table">
+            <colgroup>
+              <col class="psych-type"><col class="psych-desc">
+            </colgroup>
+            <thead>
+              <tr><th colspan="2" class="section-title">PSYCHOLOGY, p. 190 CR</th></tr>
+              <tr><th>Type</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><input data-field="psychologyTable_0_0"></td><td><input data-field="psychologyTable_0_1"></td></tr>
+              <tr><td><input data-field="psychologyTable_1_0"></td><td><input data-field="psychologyTable_1_1"></td></tr>
+              <tr><td><input data-field="psychologyTable_2_0"></td><td><input data-field="psychologyTable_2_1"></td></tr>
+              <tr><td><input data-field="psychologyTable_3_0"></td><td><input data-field="psychologyTable_3_1"></td></tr>
+              <tr><td><input data-field="psychologyTable_4_0"></td><td><input data-field="psychologyTable_4_1"></td></tr>
+              <tr><td><input data-field="psychologyTable_5_0"></td><td><input data-field="psychologyTable_5_1"></td></tr>
+              <tr><td><input data-field="psychologyTable_6_0"></td><td><input data-field="psychologyTable_6_1"></td></tr>
+              <tr><td><input data-field="psychologyTable_7_0"></td><td><input data-field="psychologyTable_7_1"></td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="full">
+          <h2>Spells and Prayers</h2>
+          <table class="record-table">
+            <colgroup>
+              <col class="spell-name"><col class="spell-cn"><col class="spell-range"><col class="spell-target"><col class="spell-duration"><col class="spell-effect">
+            </colgroup>
+            <thead>
+              <tr><th colspan="6" class="section-title">SPELLS AND PRAYERS</th></tr>
+              <tr><th>Name</th><th>CN</th><th>Range</th><th>Target</th><th>Duration</th><th>Effect</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><input data-field="spellsTable_0_0"></td><td><input data-field="spellsTable_0_1"></td><td><input data-field="spellsTable_0_2"></td><td><input data-field="spellsTable_0_3"></td><td><input data-field="spellsTable_0_4"></td><td><input data-field="spellsTable_0_5"></td></tr>
+              <tr><td><input data-field="spellsTable_1_0"></td><td><input data-field="spellsTable_1_1"></td><td><input data-field="spellsTable_1_2"></td><td><input data-field="spellsTable_1_3"></td><td><input data-field="spellsTable_1_4"></td><td><input data-field="spellsTable_1_5"></td></tr>
+              <tr><td><input data-field="spellsTable_2_0"></td><td><input data-field="spellsTable_2_1"></td><td><input data-field="spellsTable_2_2"></td><td><input data-field="spellsTable_2_3"></td><td><input data-field="spellsTable_2_4"></td><td><input data-field="spellsTable_2_5"></td></tr>
+              <tr><td><input data-field="spellsTable_3_0"></td><td><input data-field="spellsTable_3_1"></td><td><input data-field="spellsTable_3_2"></td><td><input data-field="spellsTable_3_3"></td><td><input data-field="spellsTable_3_4"></td><td><input data-field="spellsTable_3_5"></td></tr>
+              <tr><td><input data-field="spellsTable_4_0"></td><td><input data-field="spellsTable_4_1"></td><td><input data-field="spellsTable_4_2"></td><td><input data-field="spellsTable_4_3"></td><td><input data-field="spellsTable_4_4"></td><td><input data-field="spellsTable_4_5"></td></tr>
+              <tr><td><input data-field="spellsTable_5_0"></td><td><input data-field="spellsTable_5_1"></td><td><input data-field="spellsTable_5_2"></td><td><input data-field="spellsTable_5_3"></td><td><input data-field="spellsTable_5_4"></td><td><input data-field="spellsTable_5_5"></td></tr>
+              <tr><td><input data-field="spellsTable_6_0"></td><td><input data-field="spellsTable_6_1"></td><td><input data-field="spellsTable_6_2"></td><td><input data-field="spellsTable_6_3"></td><td><input data-field="spellsTable_6_4"></td><td><input data-field="spellsTable_6_5"></td></tr>
+              <tr><td><input data-field="spellsTable_7_0"></td><td><input data-field="spellsTable_7_1"></td><td><input data-field="spellsTable_7_2"></td><td><input data-field="spellsTable_7_3"></td><td><input data-field="spellsTable_7_4"></td><td><input data-field="spellsTable_7_5"></td></tr>
+              <tr><td><input data-field="spellsTable_8_0"></td><td><input data-field="spellsTable_8_1"></td><td><input data-field="spellsTable_8_2"></td><td><input data-field="spellsTable_8_3"></td><td><input data-field="spellsTable_8_4"></td><td><input data-field="spellsTable_8_5"></td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="full">
+          <h2>Notes</h2>
+          <textarea data-field="notes"></textarea>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "wfrp-character-sheet-v1";
+
+    const defaultBasicSkills = [
+      {name: "Art", characteristic: "Dex", advances: 0, notes: "Grouped"},
+      {name: "Athletics", characteristic: "Agi", advances: 0, notes: ""},
+      {name: "Bribery", characteristic: "Fel", advances: 0, notes: ""},
+      {name: "Charm", characteristic: "Fel", advances: 0, notes: ""},
+      {name: "Charm Animal", characteristic: "WP", advances: 0, notes: ""},
+      {name: "Climb", characteristic: "S", advances: 0, notes: ""},
+      {name: "Cool", characteristic: "WP", advances: 0, notes: ""},
+      {name: "Consume Alcohol", characteristic: "T", advances: 0, notes: ""},
+      {name: "Dodge", characteristic: "Agi", advances: 0, notes: ""},
+      {name: "Drive", characteristic: "Agi", advances: 0, notes: ""},
+      {name: "Endurance", characteristic: "T", advances: 0, notes: ""},
+      {name: "Entertain", characteristic: "Fel", advances: 0, notes: "Grouped"},
+      {name: "Gamble", characteristic: "Int", advances: 0, notes: ""},
+      {name: "Gossip", characteristic: "Fel", advances: 0, notes: ""},
+      {name: "Haggle", characteristic: "Fel", advances: 0, notes: ""},
+      {name: "Intimidate", characteristic: "S", advances: 0, notes: ""},
+      {name: "Intuition", characteristic: "I", advances: 0, notes: ""},
+      {name: "Leadership", characteristic: "Fel", advances: 0, notes: ""},
+      {name: "Melee", characteristic: "WS", advances: 0, notes: "Grouped"},
+      {name: "Navigation", characteristic: "I", advances: 0, notes: ""},
+      {name: "Outdoor Survival", characteristic: "Int", advances: 0, notes: ""},
+      {name: "Perception", characteristic: "I", advances: 0, notes: ""},
+      {name: "Ride", characteristic: "Agi", advances: 0, notes: "Grouped"},
+      {name: "Row", characteristic: "S", advances: 0, notes: ""},
+      {name: "Stealth", characteristic: "Agi", advances: 0, notes: "Grouped"}
+    ];
+
+    const basicGroupedSkills = [
+      {name: "Art", characteristic: "Dex"},
+      {name: "Entertain", characteristic: "Fel"},
+      {name: "Melee", characteristic: "WS"},
+      {name: "Ride", characteristic: "Agi"},
+      {name: "Stealth", characteristic: "Agi"}
+    ];
+
+    const advancedSkills = [
+      {name: "Animal Care", characteristic: "Int"},
+      {name: "Animal Training", characteristic: "Int"},
+      {name: "Channelling", characteristic: "WP"},
+      {name: "Evaluate", characteristic: "Int"},
+      {name: "Heal", characteristic: "Int"},
+      {name: "Language", characteristic: "Int"},
+      {name: "Lore", characteristic: "Int"},
+      {name: "Perform", characteristic: "Agi"},
+      {name: "Pick Lock", characteristic: "Dex"},
+      {name: "Play", characteristic: "Dex"},
+      {name: "Pray", characteristic: "Fel"},
+      {name: "Ranged", characteristic: "BS"},
+      {name: "Research", characteristic: "Int"},
+      {name: "Sail", characteristic: "Agi"},
+      {name: "Secret Signs", characteristic: "Int"},
+      {name: "Set Trap", characteristic: "Dex"},
+      {name: "Sleight of Hand", characteristic: "Dex"},
+      {name: "Swim", characteristic: "S"},
+      {name: "Track", characteristic: "I"},
+      {name: "Trade", characteristic: "Dex"}
+    ];
+
+    const weaponCatalog = [
+      {
+            "category": "Basic",
+            "weapon": "Improvised Weapon",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Varies",
+            "damage": "SB+1",
+            "qualities": "",
+            "flaws": "Undamaging, Unbalanced",
+            "notes": ""
+      },
+      {
+            "category": "Basic",
+            "weapon": "Axe",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Average",
+            "damage": "SB+4",
+            "qualities": "Hack",
+            "flaws": "Unbalanced",
+            "notes": ""
+      },
+      {
+            "category": "Basic",
+            "weapon": "Club",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Average",
+            "damage": "SB+4",
+            "qualities": "",
+            "flaws": "Undamaging, Unbalanced",
+            "notes": ""
+      },
+      {
+            "category": "Basic",
+            "weapon": "Dagger",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Very Short",
+            "damage": "SB+2",
+            "qualities": "",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Basic",
+            "weapon": "Knife",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Very Short",
+            "damage": "SB+1",
+            "qualities": "",
+            "flaws": "Undamaging",
+            "notes": ""
+      },
+      {
+            "category": "Basic",
+            "weapon": "Mace",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Average",
+            "damage": "SB+4",
+            "qualities": "Pummel",
+            "flaws": "Unbalanced",
+            "notes": ""
+      },
+      {
+            "category": "Basic",
+            "weapon": "Sword",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Average",
+            "damage": "SB+4",
+            "qualities": "",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Basic",
+            "weapon": "Ballock Knife",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Very Short",
+            "damage": "SB+1",
+            "qualities": "Impale*, Penetrating, Precise*",
+            "flaws": "",
+            "notes": "* Impale and Precise Weapon Qualities only apply if the target is Surprised or Prone."
+      },
+      {
+            "category": "Basic",
+            "weapon": "Military Pick",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Average",
+            "damage": "SB+4",
+            "qualities": "Penetrating",
+            "flaws": "Unbalanced",
+            "notes": ""
+      },
+      {
+            "category": "Basic",
+            "weapon": "Scimitar",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Short",
+            "damage": "SB+4",
+            "qualities": "Slash (1A)*",
+            "flaws": "",
+            "notes": "* Critical Damage = 1 Bleeding. Spend 1 Advantage (1A) = 1 Additional Bleeding"
+      },
+      {
+            "category": "Basic",
+            "weapon": "Warhammer",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Average",
+            "damage": "SB+4",
+            "qualities": "Pummel or Penetrating*",
+            "flaws": "Unbalanced",
+            "notes": "* Choose before attack roll"
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Arquebus",
+            "hands": "1H",
+            "enc": "3",
+            "reach": "40",
+            "damage": "9",
+            "qualities": "",
+            "flaws": "Imprecise, Dangerous, Reload 5",
+            "notes": ""
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Double Barrelled Hangun",
+            "hands": "1H",
+            "enc": "3",
+            "reach": "50",
+            "damage": "9",
+            "qualities": "Repeater 2",
+            "flaws": "Dangerous, Reload 4",
+            "notes": ""
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Griffonsfoot Pistol",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "10",
+            "damage": "7",
+            "qualities": "Spread 5",
+            "flaws": "Imprecise, Reload 5",
+            "notes": ""
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Pistol",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "20",
+            "damage": "8",
+            "qualities": "Pistol",
+            "flaws": "Reload 1",
+            "notes": ""
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Matchlock Handgun",
+            "hands": "1H",
+            "enc": "2",
+            "reach": "50",
+            "damage": "8",
+            "qualities": "",
+            "flaws": "Dangerous, Reload 4",
+            "notes": ""
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Matchlock Blunderbuss",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "20",
+            "damage": "7",
+            "qualities": "Spread 3",
+            "flaws": "Dangerous, Reload 3",
+            "notes": ""
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Hochland Long Rifle",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "100",
+            "damage": "9",
+            "qualities": "Accurate, Precise",
+            "flaws": "Reload 4",
+            "notes": ""
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Gun Axe",
+            "hands": "2H",
+            "enc": "1",
+            "reach": "30",
+            "damage": "9",
+            "qualities": "",
+            "flaws": "Imprecise, Dangerous, Reload 4",
+            "notes": ""
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Gun Halberd",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "30",
+            "damage": "9",
+            "qualities": "",
+            "flaws": "Imprecise, Dangerous, Reload 4",
+            "notes": ""
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Blunderbuss",
+            "hands": "2H",
+            "enc": "1",
+            "reach": "20",
+            "damage": "8",
+            "qualities": "",
+            "flaws": "Dangerous, Reload 2",
+            "notes": "Small shot and powder or Scrap and powder"
+      },
+      {
+            "category": "Blackpowder",
+            "weapon": "Handgun",
+            "hands": "2H",
+            "enc": "2",
+            "reach": "50",
+            "damage": "9",
+            "qualities": "",
+            "flaws": "Dangerous, Reload 3",
+            "notes": ""
+      },
+      {
+            "category": "Bow",
+            "weapon": "Bow",
+            "hands": "2H",
+            "enc": "2",
+            "reach": "50",
+            "damage": "SB+3",
+            "qualities": "",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Bow",
+            "weapon": "Shortbow",
+            "hands": "2H",
+            "enc": "1",
+            "reach": "20",
+            "damage": "SB+2",
+            "qualities": "",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Bow",
+            "weapon": "Elf Bow",
+            "hands": "2H",
+            "enc": "2",
+            "reach": "150",
+            "damage": "SB+4",
+            "qualities": "Damaging, Precise",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Bow",
+            "weapon": "Longbow",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "100",
+            "damage": "SB+4",
+            "qualities": "Damaging",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Brawling",
+            "weapon": "Unarmed",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Personal",
+            "damage": "SB+0",
+            "qualities": "",
+            "flaws": "Undamaging",
+            "notes": ""
+      },
+      {
+            "category": "Brawling",
+            "weapon": "Boat Hook",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Short",
+            "damage": "SB+4",
+            "qualities": "Trip",
+            "flaws": "Undamaging",
+            "notes": ""
+      },
+      {
+            "category": "Brawling",
+            "weapon": "Knuckledusters",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Personal",
+            "damage": "SB+2",
+            "qualities": "",
+            "flaws": "",
+            "notes": "* Can fashion with extended test"
+      },
+      {
+            "category": "Brawling",
+            "weapon": "Sap",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Personal",
+            "damage": "SB+1",
+            "qualities": "Pummel",
+            "flaws": "Undamaging, Unbalanced",
+            "notes": "* Can fashion with extended test"
+      },
+      {
+            "category": "Brawling",
+            "weapon": "Spiked Gauntlet",
+            "hands": "1H",
+            "enc": "1*",
+            "reach": "Personal",
+            "damage": "SB+3",
+            "qualities": "Impale",
+            "flaws": "Unbalanced",
+            "notes": "* 0 Enc if purchased as part of plate armor"
+      },
+      {
+            "category": "Brawling",
+            "weapon": "Locked Gauntlet",
+            "hands": "1H",
+            "enc": "1*",
+            "reach": "Personal",
+            "damage": "SB+2",
+            "qualities": "",
+            "flaws": "Undamaging",
+            "notes": "* 0 Enc if purchased as part of plate armor"
+      },
+      {
+            "category": "Brawling",
+            "weapon": "Garrote",
+            "hands": "2H",
+            "enc": "0",
+            "reach": "Personal",
+            "damage": "SB+2",
+            "qualities": "Entangle, Slow",
+            "flaws": "Undamaging, Unbalanced",
+            "notes": "* Can fashion with extended test"
+      },
+      {
+            "category": "Cavalry",
+            "weapon": "Demi-Lance",
+            "hands": "1H",
+            "enc": "2",
+            "reach": "Long",
+            "damage": "SB+5*",
+            "qualities": "Impact, Impale",
+            "flaws": "",
+            "notes": "* Lances and Demi-Lances count as Improvised Weapons if used on a round where you have not charged."
+      },
+      {
+            "category": "Cavalry",
+            "weapon": "Lance",
+            "hands": "1H",
+            "enc": "3",
+            "reach": "Very Long",
+            "damage": "SB+6*",
+            "qualities": "Impact, Impale",
+            "flaws": "",
+            "notes": "* Lances and Demi-Lances count as Improvised Weapons if used on a round where you have not charged."
+      },
+      {
+            "category": "Cavalry",
+            "weapon": "Sabre",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Average",
+            "damage": "SB+4",
+            "qualities": "Slash (1A)*",
+            "flaws": "",
+            "notes": "* If used on foot then:|| Melee (Basic): 1A quality becomes 2A || Melee (Fencing): 1A remains"
+      },
+      {
+            "category": "Cavalry",
+            "weapon": "Cavalry Hammer",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Long",
+            "damage": "SB+5*",
+            "qualities": "Pummel",
+            "flaws": "",
+            "notes": "* If on foot may be used with the Melee (Two-Handed) skill"
+      },
+      {
+            "category": "Crossbow",
+            "weapon": "Crossbow Pistol",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "10",
+            "damage": "7",
+            "qualities": "Pistol",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Crossbow",
+            "weapon": "Crossbow",
+            "hands": "2H",
+            "enc": "2",
+            "reach": "60",
+            "damage": "9",
+            "qualities": "",
+            "flaws": "Reload 1",
+            "notes": ""
+      },
+      {
+            "category": "Crossbow",
+            "weapon": "Heavy Crossbow",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "100",
+            "damage": "9",
+            "qualities": "Damaging",
+            "flaws": "Reload 2",
+            "notes": ""
+      },
+      {
+            "category": "Engineering",
+            "weapon": "Pepperbox",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "10",
+            "damage": "8",
+            "qualities": "Repeater 4*, Pistol",
+            "flaws": "Dangerous, Reload 4",
+            "notes": "* Second hand free or loses Repeater quality"
+      },
+      {
+            "category": "Engineering",
+            "weapon": "Hand Mortar",
+            "hands": "1H",
+            "enc": "3",
+            "reach": "30",
+            "damage": "7",
+            "qualities": "",
+            "flaws": "Imprecise, Dangerous, Reload 2",
+            "notes": ""
+      },
+      {
+            "category": "Engineering",
+            "weapon": "Cane Pistol",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "10",
+            "damage": "8",
+            "qualities": "",
+            "flaws": "Imprecise, Dangerous, Reload 6",
+            "notes": ""
+      },
+      {
+            "category": "Engineering",
+            "weapon": "Repeater Handgun",
+            "hands": "1H",
+            "enc": "3",
+            "reach": "30",
+            "damage": "9",
+            "qualities": "Repeater 4",
+            "flaws": "Dangerous, Reload 5",
+            "notes": ""
+      },
+      {
+            "category": "Engineering",
+            "weapon": "Repeater Pistol",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "10",
+            "damage": "8",
+            "qualities": "Repeater 4, Pistol",
+            "flaws": "Dangerous, Reload 4",
+            "notes": ""
+      },
+      {
+            "category": "Entangling",
+            "weapon": "Lasso",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "SBx2",
+            "damage": "-",
+            "qualities": "Entangle",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Entangling",
+            "weapon": "Whip",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "6",
+            "damage": "SB+2",
+            "qualities": "Entangle",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Explosives",
+            "weapon": "Bomb",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "SB",
+            "damage": "12",
+            "qualities": "Blast 5, Impact",
+            "flaws": "Dangerous",
+            "notes": ""
+      },
+      {
+            "category": "Explosives",
+            "weapon": "Incendiary",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "SB",
+            "damage": "Special*",
+            "qualities": "Blast 4",
+            "flaws": "Dangerous",
+            "notes": "* An Incendiary gives every affected target 1+SL Ablaze Conditions."
+      },
+      {
+            "category": "Fencing",
+            "weapon": "Foil",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Average",
+            "damage": "SB+3",
+            "qualities": "Fast, Impale, Precise",
+            "flaws": "Undamaging",
+            "notes": ""
+      },
+      {
+            "category": "Fencing",
+            "weapon": "Rapier",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Long",
+            "damage": "SB+4",
+            "qualities": "Fast, Impale",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Fencing",
+            "weapon": "Smallsword",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Average",
+            "damage": "SB+2",
+            "qualities": "Fast, Impale, Precise",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Flail",
+            "weapon": "Grain Flail",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Average",
+            "damage": "SB+3",
+            "qualities": "Distract, Wrap",
+            "flaws": "Imprecise",
+            "notes": "Unskilled Characters add the Dangerous weapon flaw"
+      },
+      {
+            "category": "Flail",
+            "weapon": "Flail",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Average",
+            "damage": "SB+5",
+            "qualities": "Distract, Wrap",
+            "flaws": "",
+            "notes": "Unskilled Characters add the Dangerous weapon flaw"
+      },
+      {
+            "category": "Flail",
+            "weapon": "Military Flail",
+            "hands": "2H",
+            "enc": "2",
+            "reach": "Long",
+            "damage": "SB+6",
+            "qualities": "Distract, Impact, Wrap",
+            "flaws": "Tiring",
+            "notes": "Unskilled Characters add the Dangerous weapon flaw"
+      },
+      {
+            "category": "Parrying",
+            "weapon": "Cloak*",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Short",
+            "damage": "SB+0",
+            "qualities": "Entangle, Defensive",
+            "flaws": "Undamaging",
+            "notes": "Cloak from character creation trappings is WFRP version; purchased version is UiA version"
+      },
+      {
+            "category": "Parrying",
+            "weapon": "Main Gauche",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Very Short",
+            "damage": "SB+2",
+            "qualities": "Defensive*",
+            "flaws": "",
+            "notes": "* If no Melee (Parrying) skill, this becomes a Dagger and loses the Defensive quality"
+      },
+      {
+            "category": "Parrying",
+            "weapon": "Swordbreaker",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Short",
+            "damage": "SB+1",
+            "qualities": "Defensive, Trap Blade",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Parrying",
+            "weapon": "Weighted Net",
+            "hands": "2H",
+            "enc": "1",
+            "reach": "Short",
+            "damage": "SB+0",
+            "qualities": "Entangle, Defensive, Shield 1, Wrap",
+            "flaws": "Slow, Undamaging",
+            "notes": ""
+      },
+      {
+            "category": "Polearm",
+            "weapon": "Halberd",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Long",
+            "damage": "SB+4",
+            "qualities": "Defensive, Hack or Impale*",
+            "flaws": "",
+            "notes": "* Choose before attack roll"
+      },
+      {
+            "category": "Polearm",
+            "weapon": "Spear",
+            "hands": "2H",
+            "enc": "2",
+            "reach": "Very Long",
+            "damage": "SB+4",
+            "qualities": "Impale",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Polearm",
+            "weapon": "Quarterstaff",
+            "hands": "2H",
+            "enc": "2",
+            "reach": "Long",
+            "damage": "SB+4",
+            "qualities": "Defensive, Pummel",
+            "flaws": "",
+            "notes": "* Can fashion with extended test"
+      },
+      {
+            "category": "Polearm",
+            "weapon": "Pike",
+            "hands": "2H",
+            "enc": "4",
+            "reach": "Massive",
+            "damage": "SB+4",
+            "qualities": "Impale",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Polearm",
+            "weapon": "Mancatcher",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Long",
+            "damage": "SB+2",
+            "qualities": "Defensive, Entangle",
+            "flaws": "",
+            "notes": "* Not often seen in the Empire || ** Spring loaded version"
+      },
+      {
+            "category": "Polearm",
+            "weapon": "Ahlspiess",
+            "hands": "2H",
+            "enc": "2",
+            "reach": "Very Long",
+            "damage": "SB+3",
+            "qualities": "Impale, Penetrating",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Polearm",
+            "weapon": "Bill",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Long",
+            "damage": "SB+4",
+            "qualities": "Defensive, Hack or Trip*",
+            "flaws": "",
+            "notes": "* Choose before attack roll "
+      },
+      {
+            "category": "Polearm",
+            "weapon": "Partizan/Glaive",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Long",
+            "damage": "SB+4",
+            "qualities": "Defensive, Impale or Slash (2A)*",
+            "flaws": "",
+            "notes": "* Choose before attack roll"
+      },
+      {
+            "category": "Polearm",
+            "weapon": "Pollaxe",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Long",
+            "damage": "SB+4",
+            "qualities": "Defensive, Hack or Impale or Pummel*",
+            "flaws": "",
+            "notes": "* Choose before attack roll"
+      },
+      {
+            "category": "Shield",
+            "weapon": "Shield (Buckler)",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "Personal",
+            "damage": "SB+1",
+            "qualities": "Shield 1, Defensive",
+            "flaws": "Undamaging",
+            "notes": "* Melee (Basic) skill or Melee (Parry)"
+      },
+      {
+            "category": "Shield",
+            "weapon": "Shield",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "Very Short",
+            "damage": "SB+2",
+            "qualities": "Shield 2, Defensive",
+            "flaws": "Undamaging",
+            "notes": "* Melee (Basic) skill or Melee (Parry)"
+      },
+      {
+            "category": "Shield",
+            "weapon": "Shield (Large)",
+            "hands": "1H",
+            "enc": "3",
+            "reach": "Very Short",
+            "damage": "SB+3",
+            "qualities": "Shield 3, Defensive",
+            "flaws": "Undamaging",
+            "notes": "* Melee (Basic) skill or Melee (Parry)"
+      },
+      {
+            "category": "Shield",
+            "weapon": "Pavise",
+            "hands": "1H",
+            "enc": "4",
+            "reach": "N/A",
+            "damage": "SB+2",
+            "qualities": "Shield 5",
+            "flaws": "",
+            "notes": "* Melee (Basic) skill"
+      },
+      {
+            "category": "Sling",
+            "weapon": "Sling",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "60",
+            "damage": "6",
+            "qualities": "",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Sling",
+            "weapon": "Staff Sling",
+            "hands": "2H",
+            "enc": "2",
+            "reach": "100",
+            "damage": "7",
+            "qualities": "",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Throwing",
+            "weapon": "Rock",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "SBx3",
+            "damage": "SB+0",
+            "qualities": "",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Throwing",
+            "weapon": "Throwing Axe",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "SBx2",
+            "damage": "SB+3",
+            "qualities": "Hack",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Throwing",
+            "weapon": "Throwing Knife",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "SBx2",
+            "damage": "SB+2",
+            "qualities": "",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Throwing",
+            "weapon": "Bolas",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "SBx3",
+            "damage": "SB+0",
+            "qualities": "Entangle",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Throwing",
+            "weapon": "Dart",
+            "hands": "1H",
+            "enc": "0",
+            "reach": "SBx2",
+            "damage": "SB+1",
+            "qualities": "Impale",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Throwing",
+            "weapon": "Javelin",
+            "hands": "1H",
+            "enc": "1",
+            "reach": "SBx3",
+            "damage": "SB+3",
+            "qualities": "Impale",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Two-Handed",
+            "weapon": "Pick",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Average",
+            "damage": "SB+5",
+            "qualities": "Damaging, Impale",
+            "flaws": "Slow",
+            "notes": "* Rarely seen in the Empire"
+      },
+      {
+            "category": "Two-Handed",
+            "weapon": "Warhammer",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Average",
+            "damage": "SB+6",
+            "qualities": "Damaging, Pummel",
+            "flaws": "Slow",
+            "notes": ""
+      },
+      {
+            "category": "Two-Handed",
+            "weapon": "Great Axe",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Long",
+            "damage": "SB+6",
+            "qualities": "Hack, Impact",
+            "flaws": "Tiring",
+            "notes": "* Rarely used by the Empire"
+      },
+      {
+            "category": "Two-Handed",
+            "weapon": "Flameberge Zweihander",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Long",
+            "damage": "SB+5",
+            "qualities": "Damaging, Hack, Slash (2A)",
+            "flaws": "",
+            "notes": ""
+      },
+      {
+            "category": "Two-Handed",
+            "weapon": "Bastard Sword",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Long",
+            "damage": "SB+5",
+            "qualities": "Damaging, Defensive*",
+            "flaws": "",
+            "notes": "* If used with Melee (Basic) can use as 1H, but gain Tiring and Slow flaws"
+      },
+      {
+            "category": "Two-Handed",
+            "weapon": "Zweihander",
+            "hands": "2H",
+            "enc": "3",
+            "reach": "Long",
+            "damage": "SB+5",
+            "qualities": "Damaging, Hack",
+            "flaws": "",
+            "notes": ""
+      }
+];
+
+    const defaultWeaponNames = ["Dagger", "", "", "", "", "", "", ""];
+
+    function makeRows(tableName, rows, cols) {
+      const tbody = document.querySelector(`[data-table="${tableName}"] tbody`);
+      tbody.innerHTML = "";
+      rows.forEach((row, r) => {
+        const tr = document.createElement("tr");
+        for (let c = 0; c < cols; c++) {
+          const td = document.createElement("td");
+          const input = document.createElement("input");
+          input.dataset.field = `${tableName}_${r}_${c}`;
+          input.value = row[c] || "";
+          td.appendChild(input);
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateSkillDropdowns() {
+      fillSkillDropdown("addBasicGroupedSkill", basicGroupedSkills);
+      fillSkillDropdown("addAdvancedSkill", advancedSkills);
+    }
+
+    function fillSkillDropdown(id, options) {
+      const select = document.getElementById(id);
+      if (!select) return;
+      options.forEach(skill => {
+        const option = document.createElement("option");
+        option.value = `${skill.name}|${skill.characteristic}`;
+        option.textContent = `${skill.name} (${skill.characteristic})`;
+        select.appendChild(option);
+      });
+    }
+
+    function makeSkillInput(field, value, readOnly = false, type = "text") {
+      const input = document.createElement("input");
+      input.dataset.field = field;
+      input.value = value ?? "";
+      input.type = type;
+      if (readOnly) input.readOnly = true;
+      return input;
+    }
+
+    function addSkillRow(tableName, skill, index, isCustom = false) {
+      const tbody = document.querySelector(`[data-table="${tableName}"] tbody`);
+      const tr = document.createElement("tr");
+      tr.dataset.skillChar = skill.characteristic;
+      tr.dataset.tableName = tableName;
+      if (isCustom) tr.classList.add("custom-skill-row");
+      const prefix = isCustom ? `${tableName}_custom_${index}` : `${tableName}_${index}`;
+      const cells = [
+        makeSkillInput(`${prefix}_name`, skill.name, true),
+        makeSkillInput(`${prefix}_char`, skill.characteristic, true),
+        makeSkillInput(`${prefix}_score`, "", true, "number"),
+        makeSkillInput(`${prefix}_adv`, skill.advances || 0, false, "number"),
+        makeSkillInput(`${prefix}_total`, "", true, "number"),
+        makeSkillInput(`${prefix}_notes`, skill.notes || "")
+      ];
+      cells.forEach(input => {
+        const td = document.createElement("td");
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+
+    function makeBasicSkillRows() {
+      const tbody = document.querySelector('[data-table="basicSkills"] tbody');
+      tbody.innerHTML = "";
+      defaultBasicSkills.forEach((skill, index) => addSkillRow("basicSkills", skill, index, false));
+    }
+
+    function makeAdvancedSkillRows(rows = []) {
+      const tbody = document.querySelector('[data-table="advancedSkills"] tbody');
+      tbody.innerHTML = "";
+      rows.forEach((skill, index) => addSkillRow("advancedSkills", skill, index, true));
+    }
+
+    function addSkillFromSelect(tableName, select) {
+      if (!select.value) return;
+      const [name, characteristic] = select.value.split("|");
+      const tbody = document.querySelector(`[data-table="${tableName}"] tbody`);
+      const index = tbody.querySelectorAll(".custom-skill-row").length;
+      addSkillRow(tableName, {name, characteristic, advances: 0, notes: ""}, index, true);
+      select.value = "";
+      updateCalculatedFields();
+      setStatus(`Added ${name}. Add the specialisation in Notes.`);
+    }
+
+    function getCustomSkillRows(tableName) {
+      return Array.from(document.querySelectorAll(`[data-table="${tableName}"] tbody .custom-skill-row`)).map(row => ({
+        name: row.querySelector('[data-field$="_name"]')?.value || "",
+        characteristic: row.querySelector('[data-field$="_char"]')?.value || "",
+        advances: row.querySelector('[data-field$="_adv"]')?.value || 0,
+        notes: row.querySelector('[data-field$="_notes"]')?.value || ""
+      }));
+    }
+
+
+    function makeWeaponRows(selectedWeapons = defaultWeaponNames) {
+      const tbody = document.querySelector('[data-table="weapons"] tbody');
+      tbody.innerHTML = "";
+      selectedWeapons.forEach((weaponName, index) => addWeaponRow(index, weaponName || ""));
+    }
+
+    function addWeaponRow(index, selectedWeaponName = "") {
+      const tbody = document.querySelector('[data-table="weapons"] tbody');
+      const tr = document.createElement("tr");
+      const fields = ["weapon", "group", "hands", "enc", "reach", "damage", "qualities", "flaws"];
+
+      fields.forEach((field, colIndex) => {
+        const td = document.createElement("td");
+        if (field === "weapon") {
+          const select = document.createElement("select");
+          select.dataset.field = `weapons_${index}_weapon`;
+          select.innerHTML = '<option value="">Choose weapon...</option>';
+          weaponCatalog
+            .slice()
+            .sort((a, b) => a.weapon.localeCompare(b.weapon))
+            .forEach(item => {
+              const option = document.createElement("option");
+              option.value = item.weapon;
+              option.textContent = item.weapon;
+              select.appendChild(option);
+            });
+          select.value = selectedWeaponName;
+          select.addEventListener("change", () => updateWeaponRow(tr));
+          td.appendChild(select);
+        } else {
+          const input = document.createElement("input");
+          input.dataset.field = `weapons_${index}_${field}`;
+          input.readOnly = !["qualities", "flaws"].includes(field);
+          td.appendChild(input);
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+      updateWeaponRow(tr);
+    }
+
+    function selectedWeaponNames() {
+      return Array.from(document.querySelectorAll('[data-table="weapons"] tbody select[data-field$="_weapon"]')).map(select => select.value || "");
+    }
+
+    function updateWeaponRow(row) {
+      const selected = row.querySelector('select[data-field$="_weapon"]')?.value || "";
+      const item = weaponCatalog.find(w => w.weapon === selected);
+      const set = (suffix, value) => {
+        const input = row.querySelector(`[data-field$="_${suffix}"]`);
+        if (input) input.value = value || "";
+      };
+      if (!item) {
+        ["group", "hands", "enc", "reach", "damage"].forEach(suffix => set(suffix, ""));
+        return;
+      }
+      set("group", item.category);
+      set("hands", item.hands);
+      set("enc", item.enc);
+      set("reach", item.reach);
+      set("damage", calculateWeaponDamage(item.damage));
+    }
+
+    function calculateWeaponDamage(damageText) {
+      const text = String(damageText || "").trim();
+      const match = text.match(/^SB\s*\+\s*(\d+)(\*)?$/i);
+      if (!match) return text;
+      const total = characteristicBonus("S") + Number(match[1]);
+      return `${total}${match[2] || ""}`;
+    }
+
+    function updateWeapons() {
+      document.querySelectorAll('[data-table="weapons"] tbody tr').forEach(updateWeaponRow);
+    }
+
+    function initTables() {
+      makeWeaponRows(defaultWeaponNames);
+      populateSkillDropdowns();
+      makeBasicSkillRows();
+      makeAdvancedSkillRows();
+    }
+
+    function collectSheet() {
+      const data = {};
+      document.querySelectorAll("[data-field]").forEach(el => data[el.dataset.field] = el.value);
+      data._customBasicSkills = getCustomSkillRows("basicSkills");
+      data._advancedSkills = getCustomSkillRows("advancedSkills");
+      data._selectedWeapons = selectedWeaponNames();
+      return data;
+    }
+
+    function applySheet(data) {
+      makeBasicSkillRows();
+      (data._customBasicSkills || []).forEach((skill, index) => addSkillRow("basicSkills", skill, index, true));
+      makeAdvancedSkillRows(data._advancedSkills || []);
+      makeWeaponRows(data._selectedWeapons || defaultWeaponNames);
+      document.querySelectorAll("[data-field]").forEach(el => {
+        if (Object.prototype.hasOwnProperty.call(data, el.dataset.field)) el.value = data[el.dataset.field];
+      });
+      updateCalculatedFields();
+      autoResizeNotes();
+    }
+
+    function characteristicBonus(stat) {
+      const currentValue = Number(document.querySelector(`[data-field="cur${stat}"]`)?.value || 0);
+      return Math.floor(currentValue / 10);
+    }
+
+    function updateCharacteristics() {
+      const stats = ["WS", "BS", "S", "T", "I", "Agi", "Dex", "Int", "WP", "Fel", "W"];
+      stats.forEach(stat => {
+        const starting = Number(document.querySelector(`[data-field="char${stat}"]`)?.value || 0);
+        const advances = Number(document.querySelector(`[data-field="adv${stat}"]`)?.value || 0);
+        const current = document.querySelector(`[data-field="cur${stat}"]`);
+        if (current) current.value = starting + advances;
+      });
+    }
+
+
+    function updateSkills() {
+      document.querySelectorAll('[data-table="basicSkills"] tbody tr, [data-table="advancedSkills"] tbody tr').forEach(row => {
+        const characteristic = row.dataset.skillChar;
+        const currentScore = Number(document.querySelector(`[data-field="cur${characteristic}"]`)?.value || 0);
+        const advances = Number(row.querySelector('[data-field$="_adv"]')?.value || 0);
+        const scoreField = row.querySelector('[data-field$="_score"]');
+        const totalField = row.querySelector('[data-field$="_total"]');
+        if (scoreField) scoreField.value = currentScore;
+        if (totalField) totalField.value = currentScore + advances;
+      });
+    }
+
+    function updateMovementAndEncumbrance() {
+      const movement = Number(document.querySelector('[data-field="movement"]')?.value || 0);
+      const walk = document.querySelector('[data-field="walk"]');
+      const run = document.querySelector('[data-field="run"]');
+      const totalEnc = document.querySelector('[data-field="totalEnc"]');
+      const strongBack = Number(document.querySelector('[data-field="strongBack"]')?.value || 0);
+
+      if (walk) walk.value = movement * 2;
+      if (run) run.value = movement * 4;
+      if (totalEnc) totalEnc.value = characteristicBonus("S") + characteristicBonus("T") + strongBack;
+    }
+
+    function updateCalculatedFields() {
+      updateCharacteristics();
+      updateMovementAndEncumbrance();
+      updateSkills();
+      updateWeapons();
+    }
+
+    function saveSheet() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(collectSheet()));
+      setStatus("Saved in this browser.");
+    }
+
+    function loadSheet() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return setStatus("No saved sheet found in this browser.");
+      applySheet(JSON.parse(saved));
+      setStatus("Loaded saved sheet.");
+    }
+
+    function exportSheet() {
+      const data = collectSheet();
+      const name = (data.name || "character").replace(/[^a-z0-9_-]+/gi, "_");
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${name}_sheet.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setStatus("Exported character JSON.");
+    }
+
+    function importSheet(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          applySheet(JSON.parse(reader.result));
+          saveSheet();
+          setStatus("Imported and saved character JSON.");
+        } catch (err) {
+          setStatus("Import failed: invalid JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function autoResizeTextarea(el) {
+      if (!el) return;
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    }
+
+    function autoResizeNotes() {
+      autoResizeTextarea(document.querySelector('[data-field="notes"]'));
+    }
+
+    function clearSheet() {
+      if (!confirm("Clear all fields on this sheet?")) return;
+      document.querySelectorAll("[data-field]").forEach(el => {
+        if (!el.readOnly) el.value = "";
+      });
+      makeBasicSkillRows();
+      makeAdvancedSkillRows();
+      makeWeaponRows();
+      updateCalculatedFields();
+      setStatus("Cleared sheet. Use Save to overwrite saved data.");
+    }
+
+    function setStatus(message) {
+      document.getElementById("status").textContent = message;
+      setTimeout(() => document.getElementById("status").textContent = "Ready", 3500);
+    }
+
+    document.addEventListener("input", event => {
+      if (event.target.matches('[data-field^="char"], [data-field^="adv"], [data-field="movement"], [data-field="strongBack"], [data-field*="Skills_"]')) updateCalculatedFields();
+      if (event.target.matches('[data-field="notes"]')) autoResizeTextarea(event.target);
+    });
+
+    initTables();
+    updateCalculatedFields();
+    autoResizeNotes();
+  </script>
+</body>
+</html>
