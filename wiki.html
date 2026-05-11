@@ -13,6 +13,7 @@
     --paper2:#fff5d8;
     --ink:#24180c;
     --line:#9c7a4b;
+    --blue:#1d4f91;
 }
 *{ box-sizing:border-box; }
 body{
@@ -52,7 +53,7 @@ body{
     min-height:calc(100vh - 58px);
 }
 .sidebar{
-    width:340px;
+    width:355px;
     background:#ead9aa;
     border-right:4px solid var(--mid);
     padding:14px;
@@ -83,7 +84,11 @@ button:hover{ background:#593f23; }
 button.danger{ background:#8b2f22; }
 button.danger:hover{ background:#6f2118; }
 button.secondary{ background:#8a734e; }
-input, select, textarea{
+button.small-button{
+    padding:5px 8px;
+    font-size:12px;
+}
+input, select{
     width:100%;
     padding:9px;
     border:1px solid var(--line);
@@ -92,10 +97,6 @@ input, select, textarea{
     font-family:Arial, sans-serif;
     font-size:14px;
     margin:4px 0 12px;
-}
-textarea{
-    min-height:260px;
-    resize:vertical;
 }
 label{
     font-weight:bold;
@@ -106,7 +107,7 @@ label{
     border-radius:12px;
     box-shadow:0 3px 12px rgba(0,0,0,.25);
     padding:18px;
-    max-width:1050px;
+    max-width:1100px;
 }
 .form-header{
     display:flex;
@@ -189,9 +190,95 @@ label{
     font-style:italic;
     padding:10px;
 }
-@media(max-width:800px){
+.editor-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    padding:8px;
+    background:#dfc895;
+    border:1px solid var(--line);
+    border-radius:8px 8px 0 0;
+}
+.rich-editor{
+    min-height:320px;
+    background:#fffdf3;
+    border:1px solid var(--line);
+    border-top:0;
+    border-radius:0 0 8px 8px;
+    padding:12px;
+    font-family:Arial, sans-serif;
+    font-size:15px;
+    line-height:1.45;
+    outline:none;
+    overflow-y:auto;
+}
+.rich-editor:empty:before{
+    content:attr(data-placeholder);
+    color:#8b7a5e;
+}
+.wiki-link{
+    color:var(--blue);
+    font-weight:bold;
+    text-decoration:underline;
+    cursor:pointer;
+}
+.wiki-link.missing{
+    color:#8b2f22;
+    text-decoration-style:dashed;
+}
+.tag-pill{
+    display:inline-block;
+    background:#6f512f;
+    color:white;
+    padding:4px 8px;
+    border-radius:999px;
+    margin:2px;
+    cursor:pointer;
+    font-size:12px;
+}
+.tag-pill:hover{
+    background:#4f361d;
+}
+.tag-row{
+    margin-top:4px;
+}
+.view-box{
+    margin-top:18px;
+    background:#fff5d8;
+    border:2px solid var(--mid);
+    border-radius:10px;
+    padding:14px;
+}
+.view-box h3{
+    margin-top:0;
+}
+.backlink{
+    background:#e7d4aa;
+    padding:8px;
+    border-radius:6px;
+    margin-bottom:6px;
+    cursor:pointer;
+}
+.backlink:hover{
+    background:#d5bc83;
+}
+.entry-image{
+    max-width:360px;
+    max-height:360px;
+    border:2px solid var(--mid);
+    border-radius:8px;
+    margin:8px 0;
+    display:block;
+}
+.search-help{
+    font-size:12px;
+    color:#604a2a;
+    margin-top:-6px;
+    margin-bottom:8px;
+}
+@media(max-width:850px){
     .layout{ flex-direction:column; }
-    .sidebar{ width:100%; max-height:45vh; border-right:0; border-bottom:4px solid var(--mid); }
+    .sidebar{ width:100%; max-height:48vh; border-right:0; border-bottom:4px solid var(--mid); }
     .grid2{ grid-template-columns:1fr; }
 }
 </style>
@@ -208,7 +295,8 @@ label{
     <aside class="sidebar">
         <button onclick="newEntry()" style="width:100%; margin-bottom:10px;">+ New Entry</button>
 
-        <input type="text" id="search" placeholder="Search entries..." oninput="renderEntries()">
+        <input type="text" id="search" placeholder="Search title, text, location, tags..." oninput="renderEntries()">
+        <div class="search-help">Tip: click a tag pill to filter by tag.</div>
 
         <div class="filter-bar">
             <button id="filterAll" onclick="setFilter('All')">All</button>
@@ -226,7 +314,7 @@ label{
             <div class="form-header">
                 <div>
                     <h2>Create / Edit Entry</h2>
-                    <div class="small">Select an entry from the sidebar to edit it, or create a new one.</div>
+                    <div class="small">Use <strong>[[Entry Name]]</strong> to link to another wiki entry.</div>
                 </div>
                 <div class="meta">
                     <div><strong>Created:</strong> <span id="createdDisplay">—</span></div>
@@ -257,20 +345,39 @@ label{
             <input type="text" id="location" placeholder="Example: Altdorf, The Crossed Pikes, Warehouse 13">
 
             <label>Tags</label>
-            <input type="text" id="tags" placeholder="Comma separated tags">
+            <input type="text" id="tags" placeholder="Comma separated tags, e.g. cult, noble, clue">
 
             <label>Image Upload</label>
             <input type="file" id="imageUpload" accept="image/*">
             <img id="preview" class="preview" alt="Uploaded preview">
 
             <label>Notes</label>
-            <textarea id="content" placeholder="Write notes here..."></textarea>
+            <div class="editor-toolbar">
+                <button type="button" class="small-button" onclick="formatText('bold')"><b>B</b></button>
+                <button type="button" class="small-button" onclick="formatText('italic')"><i>I</i></button>
+                <button type="button" class="small-button" onclick="formatText('underline')"><u>U</u></button>
+                <button type="button" class="small-button" onclick="formatText('formatBlock','h2')">H2</button>
+                <button type="button" class="small-button" onclick="formatText('formatBlock','h3')">H3</button>
+                <button type="button" class="small-button" onclick="formatText('insertUnorderedList')">• List</button>
+                <button type="button" class="small-button" onclick="formatText('insertOrderedList')">1. List</button>
+                <button type="button" class="small-button" onclick="formatText('formatBlock','blockquote')">Quote</button>
+                <button type="button" class="small-button" onclick="formatText('insertHorizontalRule')">HR</button>
+                <button type="button" class="small-button" onclick="insertWikiLink()">[[Link]]</button>
+            </div>
+            <div id="editor" class="rich-editor" contenteditable="true" data-placeholder="Write notes here..."></div>
 
-            <div class="toolbar">
+            <div class="toolbar" style="margin-top:12px;">
                 <button onclick="saveEntry()">Save Entry</button>
                 <button class="secondary" onclick="newEntry()">Clear / New Entry</button>
                 <button class="danger" onclick="deleteEntry()">Delete Entry</button>
                 <span id="saveStatus" class="small"></span>
+            </div>
+
+            <div class="view-box" id="renderedBox" style="display:none;">
+                <h3>Entry Preview</h3>
+                <div id="renderedContent"></div>
+                <div id="renderedTags" class="tag-row"></div>
+                <div id="backlinksBox"></div>
             </div>
         </div>
     </main>
@@ -300,6 +407,7 @@ const storage = getStorage(app);
 
 let entries = [];
 let currentFilter = "All";
+let activeTagFilter = "";
 
 const els = {
     firebaseStatus: document.getElementById("firebaseStatus"),
@@ -310,13 +418,17 @@ const els = {
     title: document.getElementById("title"),
     location: document.getElementById("location"),
     tags: document.getElementById("tags"),
-    content: document.getElementById("content"),
+    editor: document.getElementById("editor"),
     imageUpload: document.getElementById("imageUpload"),
     preview: document.getElementById("preview"),
     existingImageUrl: document.getElementById("existingImageUrl"),
     createdDisplay: document.getElementById("createdDisplay"),
     updatedDisplay: document.getElementById("updatedDisplay"),
-    saveStatus: document.getElementById("saveStatus")
+    saveStatus: document.getElementById("saveStatus"),
+    renderedBox: document.getElementById("renderedBox"),
+    renderedContent: document.getElementById("renderedContent"),
+    renderedTags: document.getElementById("renderedTags"),
+    backlinksBox: document.getElementById("backlinksBox")
 };
 
 function formatTimestamp(value){
@@ -336,6 +448,159 @@ function escapeHtml(text){
         .replaceAll("'","&#039;");
 }
 
+function normalizeTitle(title){
+    return String(title || "").trim().toLowerCase();
+}
+
+function getTagsFromInput(){
+    return els.tags.value
+        .split(",")
+        .map(t => t.trim())
+        .filter(Boolean);
+}
+
+function tagsToString(tags){
+    if(Array.isArray(tags)) return tags.join(", ");
+    return tags || "";
+}
+
+function entryTags(entry){
+    if(Array.isArray(entry.tags)) return entry.tags;
+    if(typeof entry.tags === "string"){
+        return entry.tags.split(",").map(t => t.trim()).filter(Boolean);
+    }
+    return [];
+}
+
+function stripHtml(html){
+    const div = document.createElement("div");
+    div.innerHTML = html || "";
+    return div.textContent || div.innerText || "";
+}
+
+window.formatText = function(command, value = null){
+    document.execCommand(command, false, value);
+    els.editor.focus();
+};
+
+window.insertWikiLink = function(){
+    const title = prompt("Enter the entry title to link:");
+    if(!title) return;
+    document.execCommand("insertText", false, `[[${title}]]`);
+    els.editor.focus();
+};
+
+function findEntryByTitle(title){
+    return entries.find(e => normalizeTitle(e.title) === normalizeTitle(title));
+}
+
+function renderWikiLinks(html){
+    return (html || "").replace(/\[\[(.*?)\]\]/g, (match, p1) => {
+        const title = p1.trim();
+        const found = findEntryByTitle(title);
+        const safeTitle = escapeHtml(title);
+        const cls = found ? "wiki-link" : "wiki-link missing";
+        return `<span class="${cls}" data-wikilink="${safeTitle}">[[${safeTitle}]]</span>`;
+    });
+}
+
+function wireWikiLinks(container){
+    container.querySelectorAll("[data-wikilink]").forEach(el => {
+        el.addEventListener("click", () => openWikiLink(el.dataset.wikilink));
+    });
+}
+
+window.openWikiLink = function(title){
+    const entry = findEntryByTitle(title);
+    if(entry){
+        window.editEntry(entry.id);
+    } else {
+        const create = confirm(`No entry named "${title}" exists. Create it now?`);
+        if(create){
+            window.newEntry();
+            els.title.value = title;
+        }
+    }
+};
+
+function generateBacklinks(targetTitle, currentId){
+    const backlinks = [];
+    const target = normalizeTitle(targetTitle);
+    if(!target) return backlinks;
+
+    const regex = /\[\[(.*?)\]\]/g;
+
+    for(const entry of entries){
+        if(entry.id === currentId) continue;
+        const content = entry.content || "";
+        let match;
+        while((match = regex.exec(content)) !== null){
+            if(normalizeTitle(match[1]) === target){
+                backlinks.push(entry);
+                break;
+            }
+        }
+    }
+
+    return backlinks;
+}
+
+function renderTags(tags){
+    return tags.map(tag =>
+        `<span class="tag-pill" data-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</span>`
+    ).join(" ");
+}
+
+function wireTagPills(container){
+    container.querySelectorAll("[data-tag]").forEach(el => {
+        el.addEventListener("click", () => {
+            activeTagFilter = el.dataset.tag;
+            els.search.value = `tag:${activeTagFilter}`;
+            renderEntries();
+        });
+    });
+}
+
+function updatePreview(entry){
+    if(!entry){
+        els.renderedBox.style.display = "none";
+        return;
+    }
+
+    els.renderedBox.style.display = "block";
+
+    let imageHtml = "";
+    if(entry.imageUrl){
+        imageHtml = `<img class="entry-image" src="${escapeHtml(entry.imageUrl)}" alt="Entry image">`;
+    }
+
+    els.renderedContent.innerHTML = imageHtml + renderWikiLinks(entry.content || "");
+    wireWikiLinks(els.renderedContent);
+
+    const tags = entryTags(entry);
+    els.renderedTags.innerHTML = tags.length ? renderTags(tags) : "";
+    wireTagPills(els.renderedTags);
+
+    const backlinks = generateBacklinks(entry.title, entry.id);
+
+    if(backlinks.length){
+        els.backlinksBox.innerHTML = `
+            <h3>Linked From</h3>
+            ${backlinks.map(b => `
+                <div class="backlink" data-entryid="${escapeHtml(b.id)}">
+                    <strong>${escapeHtml(b.title || "Untitled")}</strong>
+                    <div class="small">${escapeHtml(b.category || "")}</div>
+                </div>
+            `).join("")}
+        `;
+        els.backlinksBox.querySelectorAll("[data-entryid]").forEach(el => {
+            el.addEventListener("click", () => window.editEntry(el.dataset.entryid));
+        });
+    } else {
+        els.backlinksBox.innerHTML = "<h3>Linked From</h3><div class='small'>No backlinks yet.</div>";
+    }
+}
+
 function setActiveFilterButton(){
     ["All","NPCs","Locations","Handouts","Session Notes"].forEach(cat => {
         const id = "filter" + cat.replaceAll(" ","");
@@ -346,6 +611,8 @@ function setActiveFilterButton(){
 
 window.setFilter = function(filter){
     currentFilter = filter;
+    activeTagFilter = "";
+    if(els.search.value.startsWith("tag:")) els.search.value = "";
     setActiveFilterButton();
     renderEntries();
 };
@@ -356,7 +623,7 @@ window.newEntry = function(){
     els.title.value = "";
     els.location.value = "";
     els.tags.value = "";
-    els.content.value = "";
+    els.editor.innerHTML = "";
     els.imageUpload.value = "";
     els.preview.src = "";
     els.preview.style.display = "none";
@@ -364,6 +631,7 @@ window.newEntry = function(){
     els.createdDisplay.textContent = "—";
     els.updatedDisplay.textContent = "—";
     els.saveStatus.textContent = "";
+    updatePreview(null);
 };
 
 window.editEntry = function(id){
@@ -374,8 +642,8 @@ window.editEntry = function(id){
     els.category.value = entry.category || "NPCs";
     els.title.value = entry.title || "";
     els.location.value = entry.location || "";
-    els.tags.value = entry.tags || "";
-    els.content.value = entry.content || "";
+    els.tags.value = tagsToString(entry.tags);
+    els.editor.innerHTML = entry.content || "";
     els.existingImageUrl.value = entry.imageUrl || "";
     els.createdDisplay.textContent = formatTimestamp(entry.createdAt);
     els.updatedDisplay.textContent = formatTimestamp(entry.updatedAt);
@@ -389,6 +657,7 @@ window.editEntry = function(id){
         els.preview.style.display = "none";
     }
 
+    updatePreview(entry);
     window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
@@ -425,8 +694,9 @@ window.saveEntry = async function(){
         category: els.category.value,
         title,
         location: els.location.value.trim(),
-        tags: els.tags.value.trim(),
-        content: els.content.value,
+        tags: getTagsFromInput(),
+        content: els.editor.innerHTML,
+        textContent: stripHtml(els.editor.innerHTML),
         imageUrl,
         createdAt: existing?.createdAt || serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -459,7 +729,14 @@ window.deleteEntry = async function(){
 };
 
 window.renderEntries = function(){
-    const query = els.search.value.toLowerCase().trim();
+    const rawQuery = els.search.value.trim();
+    const query = rawQuery.toLowerCase();
+
+    let tagQuery = "";
+    if(query.startsWith("tag:")){
+        tagQuery = query.replace("tag:","").trim();
+        activeTagFilter = tagQuery;
+    }
 
     let filtered = entries.slice();
 
@@ -469,11 +746,15 @@ window.renderEntries = function(){
 
     if(query){
         filtered = filtered.filter(e => {
+            const tags = entryTags(e).map(t => t.toLowerCase());
+            if(tagQuery){
+                return tags.some(t => t.includes(tagQuery));
+            }
             return (
                 (e.title || "").toLowerCase().includes(query) ||
                 (e.location || "").toLowerCase().includes(query) ||
-                (e.tags || "").toLowerCase().includes(query) ||
-                (e.content || "").toLowerCase().includes(query)
+                tags.some(tag => tag.includes(query)) ||
+                stripHtml(e.content || "").toLowerCase().includes(query)
             );
         });
     }
@@ -513,10 +794,13 @@ window.renderEntries = function(){
             const div = document.createElement("div");
             div.className = "entry-link";
             div.onclick = () => window.editEntry(entry.id);
+
+            const tags = entryTags(entry);
             div.innerHTML = `
                 <div class="entry-title">${escapeHtml(entry.title || "Untitled")}</div>
                 <div class="small">${escapeHtml(entry.location || "")}</div>
                 <div class="small">Edited: ${escapeHtml(formatTimestamp(entry.updatedAt))}</div>
+                <div class="tag-row">${tags.slice(0,4).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(" ")}</div>
             `;
             content.appendChild(div);
         }
@@ -535,6 +819,16 @@ onSnapshot(collection(db, "wikiEntries"), snapshot => {
     entries = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     els.firebaseStatus.textContent = "Connected ✓";
     renderEntries();
+
+    const openId = els.editingId.value;
+    if(openId){
+        const refreshed = entries.find(e => e.id === openId);
+        if(refreshed){
+            els.createdDisplay.textContent = formatTimestamp(refreshed.createdAt);
+            els.updatedDisplay.textContent = formatTimestamp(refreshed.updatedAt);
+            updatePreview(refreshed);
+        }
+    }
 }, error => {
     console.error(error);
     els.firebaseStatus.textContent = "Firebase error";
