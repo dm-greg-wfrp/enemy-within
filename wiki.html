@@ -330,6 +330,8 @@ label{ font-weight:bold; }
                     <label>Category</label>
                     <select id="category">
                         <option>NPCs</option>
+                        <option>Characters</option>
+                        <option>Enemies</option>
                         <option>Locations</option>
                         <option>Handouts</option>
                         <option>Session Notes</option>
@@ -342,10 +344,10 @@ label{ font-weight:bold; }
             </div>
 
             <label>Location</label>
-            <input type="text" id="location" placeholder="Example: Altdorf, The Crossed Pikes, Warehouse 13">
+            <input type="text" id="location" placeholder="Example: Altdorf, the Reik, Horse and Coaches Inn">
 
             <label>Tags</label>
-            <input type="text" id="tags" placeholder="Comma separated tags, e.g. cult, noble, clue">
+            <input type="text" id="tags" placeholder="Comma separated tags, e.g. city, goblin, quest, merchant, river">
 
             <label>Image Upload</label>
             <input type="file" id="imageUpload" accept="image/*">
@@ -570,7 +572,7 @@ function wireTagPills(container){
 }
 
 function setActiveFilterButton(){
-    ["All","NPCs","Locations","Handouts","Session Notes"].forEach(cat => {
+    [All","NPCs","Characters","Enemies","Locations","Handouts","Session Notes"].forEach(cat => {
         const id = "filter" + cat.replaceAll(" ","");
         const btn = document.getElementById(id);
         if(btn) btn.classList.toggle("active", cat === currentFilter);
@@ -800,7 +802,7 @@ window.renderEntries = function(){
         grouped[cat].push(entry);
     }
 
-    const order = ["NPCs","Locations","Handouts","Session Notes","Other"];
+    const order = ["NPCs","Characters","Enemies","Locations","Handouts","Session Notes","Other"];
     els.sidebarEntries.innerHTML = "";
     let renderedAny = false;
 
