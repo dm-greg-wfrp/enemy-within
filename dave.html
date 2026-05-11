@@ -1847,15 +1847,29 @@
       }
     }
 
+    function showSheetAfterLoad() {
+      const loadingScreen = document.getElementById("loadingScreen");
+      const sheet = document.getElementById("sheet");
+
+      if (loadingScreen) loadingScreen.style.display = "none";
+      if (sheet) sheet.style.display = "block";
+    }
+
     async function loadSheet() {
       isLoadingSheet = true;
+
       try {
         const doc = await db.collection(CLOUD_COLLECTION).doc(CHARACTER_ID).get();
+
         if (doc.exists) {
           const data = doc.data();
+
           applySheet(data);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
           setStatus("Loaded online sheet.", "saved-ok");
+
+          showSheetAfterLoad();
+
           return;
         }
       } catch (err) {
@@ -1866,9 +1880,17 @@
       }
 
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return setStatus(`No online or browser save found for ${CHARACTER_ID}.`, "unsaved");
+
+      if (!saved) {
+        setStatus(`No online or browser save found for ${CHARACTER_ID}.`, "unsaved");
+        showSheetAfterLoad();
+        return;
+      }
+
       applySheet(JSON.parse(saved));
       setStatus("Loaded browser backup.", "saved-ok");
+
+      showSheetAfterLoad();
     }
 
     function exportSheet() {
