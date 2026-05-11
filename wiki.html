@@ -572,7 +572,7 @@ function wireTagPills(container){
 }
 
 function setActiveFilterButton(){
-    [All","NPCs","Characters","Enemies","Locations","Handouts","Session Notes"].forEach(cat => {
+    ["All","NPCs","Characters","Enemies","Locations","Handouts","Session Notes"].forEach(cat => {
         const id = "filter" + cat.replaceAll(" ","");
         const btn = document.getElementById(id);
         if(btn) btn.classList.toggle("active", cat === currentFilter);
