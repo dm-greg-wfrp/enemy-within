@@ -237,6 +237,46 @@ label{ font-weight:bold; }
     color:#5f4726;
 }
 #viewPanel, #editPanel{ display:none; }
+
+.directory-group{
+    margin-bottom:18px;
+}
+.directory-group h2{
+    margin:0;
+    background:var(--dark);
+    color:white;
+    padding:9px 12px;
+    border-radius:8px 8px 0 0;
+    font-size:1.05rem;
+}
+.directory-list{
+    background:var(--paper2);
+    border:1px solid var(--mid);
+    border-top:0;
+    border-radius:0 0 8px 8px;
+    padding:8px;
+}
+.directory-entry{
+    display:block;
+    padding:7px 8px;
+    border-bottom:1px solid #d1ba88;
+    cursor:pointer;
+    border-radius:5px;
+}
+.directory-entry:hover{
+    background:#e4d0a0;
+}
+.directory-entry:last-child{
+    border-bottom:0;
+}
+.directory-title{
+    font-weight:bold;
+}
+.directory-meta{
+    font-size:12px;
+    color:#604a2a;
+}
+
 @media(max-width:850px){
     .layout{ flex-direction:column; }
     .sidebar{ width:100%; max-height:48vh; border-right:0; border-bottom:4px solid var(--mid); }
@@ -254,15 +294,18 @@ label{ font-weight:bold; }
 
 <div class="layout">
     <aside class="sidebar">
-        <button onclick="newEntry()" style="width:100%; margin-bottom:10px;">+ New Entry</button>
+        <button onclick="newEntry()" style="width:100%; margin-bottom:8px;">+ New Entry</button>
+        <button class="secondary" onclick="showDirectory()" style="width:100%; margin-bottom:10px;">Browse All Entries</button>
 
         <input type="text" id="search" placeholder="Search title, text, location, tags..." oninput="renderEntries()">
         <div class="search-help">Tip: click a tag pill to filter by tag.</div>
 
         <div class="filter-bar">
             <button id="filterAll" onclick="setFilter('All')">All</button>
-            <button id="filterNPCs" onclick="setFilter('NPCs')">NPCs</button>
             <button id="filterLocations" onclick="setFilter('Locations')">Locations</button>
+            <button id="filterNPCs" onclick="setFilter('NPCs')">NPCs</button>
+            <button id="filterCharacters" onclick="setFilter('Characters')">Characters</button>
+            <button id="filterEnemies" onclick="setFilter('Enemies')">Enemies</button>
             <button id="filterHandouts" onclick="setFilter('Handouts')">Handouts</button>
             <button id="filterSessionNotes" onclick="setFilter('Session Notes')">Session Notes</button>
         </div>
@@ -271,6 +314,17 @@ label{ font-weight:bold; }
     </aside>
 
     <main class="content">
+
+        <div id="directoryPanel" class="panel">
+            <div class="panel-header">
+                <div>
+                    <h1>All Wiki Entries</h1>
+                    <div class="small">Alphabetical directory grouped by category.</div>
+                </div>
+            </div>
+            <div id="directoryContent"></div>
+        </div>
+
         <div id="emptyPanel" class="panel">
             <div class="placeholder">
                 <h1>Campaign Wiki</h1>
@@ -347,7 +401,7 @@ label{ font-weight:bold; }
             <input type="text" id="location" placeholder="Example: Altdorf, the Reik, Horse and Coaches Inn">
 
             <label>Tags</label>
-            <input type="text" id="tags" placeholder="Comma separated tags, e.g. city, goblin, quest, merchant, river">
+            <input type="text" id="tags" placeholder="Example: city, goblin, quest, merchant, river">
 
             <label>Image Upload</label>
             <input type="file" id="imageUpload" accept="image/*">
@@ -411,6 +465,8 @@ const els = {
     sidebarEntries: document.getElementById("sidebarEntries"),
     search: document.getElementById("search"),
     emptyPanel: document.getElementById("emptyPanel"),
+    directoryPanel: document.getElementById("directoryPanel"),
+    directoryContent: document.getElementById("directoryContent"),
     viewPanel: document.getElementById("viewPanel"),
     editPanel: document.getElementById("editPanel"),
 
@@ -441,6 +497,7 @@ const els = {
 
 function showMode(mode){
     currentMode = mode;
+    els.directoryPanel.style.display = mode === "directory" ? "block" : "none";
     els.emptyPanel.style.display = mode === "empty" ? "block" : "none";
     els.viewPanel.style.display = mode === "view" ? "block" : "none";
     els.editPanel.style.display = mode === "edit" ? "block" : "none";
@@ -572,7 +629,7 @@ function wireTagPills(container){
 }
 
 function setActiveFilterButton(){
-    ["All","NPCs","Characters","Enemies","Locations","Handouts","Session Notes"].forEach(cat => {
+    ["All","Locations","NPCs","Characters","Enemies","Handouts","Session Notes"].forEach(cat => {
         const id = "filter" + cat.replaceAll(" ","");
         const btn = document.getElementById(id);
         if(btn) btn.classList.toggle("active", cat === currentFilter);
@@ -689,7 +746,7 @@ window.cancelEdit = function(){
     if(currentEntryId){
         openEntryView(currentEntryId);
     } else {
-        showMode("empty");
+        showDirectory();
     }
 };
 
@@ -760,8 +817,70 @@ window.deleteEntry = async function(){
     await deleteDoc(doc(db, "wikiEntries", id));
     currentEntryId = "";
     window.newEntry();
-    showMode("empty");
+    showDirectory();
 };
+
+
+window.showDirectory = function(){
+    renderDirectory();
+    showMode("directory");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+function renderDirectory(){
+    const order = ["Locations","NPCs","Characters","Enemies","Handouts","Session Notes","Other"];
+    const grouped = {};
+
+    for(const entry of entries){
+        const cat = entry.category || "Other";
+        if(!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(entry);
+    }
+
+    els.directoryContent.innerHTML = "";
+
+    let any = false;
+
+    for(const cat of order){
+        if(!grouped[cat] || !grouped[cat].length) continue;
+
+        any = true;
+        grouped[cat].sort((a,b) => (a.title || "").localeCompare(b.title || ""));
+
+        const group = document.createElement("div");
+        group.className = "directory-group";
+
+        const heading = document.createElement("h2");
+        heading.textContent = cat;
+
+        const list = document.createElement("div");
+        list.className = "directory-list";
+
+        for(const entry of grouped[cat]){
+            const item = document.createElement("div");
+            item.className = "directory-entry";
+            item.onclick = () => openEntryView(entry.id);
+
+            const tags = entryTags(entry);
+            item.innerHTML = `
+                <div class="directory-title">${escapeHtml(entry.title || "Untitled")}</div>
+                <div class="directory-meta">${escapeHtml(entry.location || "")}</div>
+                ${tags.length ? `<div class="tag-row">${tags.slice(0,5).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(" ")}</div>` : ""}
+            `;
+
+            list.appendChild(item);
+        }
+
+        group.appendChild(heading);
+        group.appendChild(list);
+        els.directoryContent.appendChild(group);
+    }
+
+    if(!any){
+        els.directoryContent.innerHTML = `<div class="empty">No wiki entries have been created yet.</div>`;
+    }
+}
+
 
 window.renderEntries = function(){
     const rawQuery = els.search.value.trim();
@@ -802,7 +921,7 @@ window.renderEntries = function(){
         grouped[cat].push(entry);
     }
 
-    const order = ["NPCs","Characters","Enemies","Locations","Handouts","Session Notes","Other"];
+    const order = ["Locations","NPCs","Characters","Enemies","Handouts","Session Notes","Other"];
     els.sidebarEntries.innerHTML = "";
     let renderedAny = false;
 
@@ -852,6 +971,10 @@ onSnapshot(collection(db, "wikiEntries"), snapshot => {
     els.firebaseStatus.textContent = "Connected ✓";
     renderEntries();
 
+    if(currentMode === "directory"){
+        renderDirectory();
+    }
+
     if(currentEntryId && currentMode === "view"){
         openEntryView(currentEntryId);
     }
@@ -862,7 +985,7 @@ onSnapshot(collection(db, "wikiEntries"), snapshot => {
 });
 
 setActiveFilterButton();
-showMode("empty");
+showDirectory();
 </script>
 </body>
 </html>
