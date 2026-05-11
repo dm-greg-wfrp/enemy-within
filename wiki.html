@@ -1,17 +1,547 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Campaign Wiki</title>
+
+<style>
+:root{
+    --dark:#3f2c18;
+    --mid:#6f512f;
+    --paper:#f4e7c5;
+    --paper2:#fff5d8;
+    --ink:#24180c;
+    --line:#9c7a4b;
+}
+*{ box-sizing:border-box; }
+body{
+    margin:0;
+    font-family: Georgia, "Times New Roman", serif;
+    background:#c9b181;
+    color:var(--ink);
+}
+.topbar{
+    background:var(--dark);
+    color:white;
+    padding:12px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    border-bottom:4px solid #23170b;
+}
+.topbar a{
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+}
+.topbar .title{
+    font-size:22px;
+    font-weight:bold;
+}
+.status-pill{
+    background:#2f2112;
+    border:1px solid #bfa36e;
+    border-radius:999px;
+    padding:6px 10px;
+    font-size:13px;
+}
+.layout{
+    display:flex;
+    min-height:calc(100vh - 58px);
+}
+.sidebar{
+    width:340px;
+    background:#ead9aa;
+    border-right:4px solid var(--mid);
+    padding:14px;
+    overflow-y:auto;
+}
+.content{
+    flex:1;
+    padding:20px;
+    overflow-y:auto;
+}
+.toolbar{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+}
+button{
+    background:var(--mid);
+    color:white;
+    border:0;
+    border-radius:6px;
+    padding:9px 13px;
+    cursor:pointer;
+    font-weight:bold;
+    font-family:inherit;
+}
+button:hover{ background:#593f23; }
+button.danger{ background:#8b2f22; }
+button.danger:hover{ background:#6f2118; }
+button.secondary{ background:#8a734e; }
+input, select, textarea{
+    width:100%;
+    padding:9px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:#fffdf3;
+    font-family:Arial, sans-serif;
+    font-size:14px;
+    margin:4px 0 12px;
+}
+textarea{
+    min-height:260px;
+    resize:vertical;
+}
+label{
+    font-weight:bold;
+}
+.form-box{
+    background:var(--paper);
+    border:3px solid var(--mid);
+    border-radius:12px;
+    box-shadow:0 3px 12px rgba(0,0,0,.25);
+    padding:18px;
+    max-width:1050px;
+}
+.form-header{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    margin-bottom:8px;
+}
+.form-header h2{
+    margin:0 0 8px;
+}
+.meta{
+    background:#e8d6a8;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px;
+    font-size:13px;
+    min-width:260px;
+}
+.grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+}
+.filter-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:8px 0 12px;
+}
+.filter-bar button.active{
+    outline:3px solid #d7b55f;
+}
+.section{
+    margin:12px 0;
+}
+.section h3{
+    margin:0;
+    background:var(--dark);
+    color:white;
+    padding:9px 10px;
+    border-radius:8px 8px 0 0;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+}
+.section-content{
+    background:var(--paper2);
+    border:1px solid var(--mid);
+    border-top:0;
+    padding:6px;
+}
+.entry-link{
+    padding:8px;
+    border-bottom:1px solid #d1ba88;
+    cursor:pointer;
+    border-radius:5px;
+}
+.entry-link:hover{
+    background:#e4d0a0;
+}
+.entry-title{
+    font-weight:bold;
+}
+.small{
+    color:#604a2a;
+    font-size:12px;
+}
+.preview{
+    display:none;
+    max-width:320px;
+    max-height:320px;
+    border:2px solid var(--mid);
+    border-radius:8px;
+    margin:4px 0 12px;
+}
+.empty{
+    color:#6b5633;
+    font-style:italic;
+    padding:10px;
+}
+@media(max-width:800px){
+    .layout{ flex-direction:column; }
+    .sidebar{ width:100%; max-height:45vh; border-right:0; border-bottom:4px solid var(--mid); }
+    .grid2{ grid-template-columns:1fr; }
+}
+</style>
 </head>
+
 <body>
-<h1>Campaign Wiki Updated</h1>
-<ul>
-<li>Delete Entry button added</li>
-<li>Created timestamp added</li>
-<li>Last Edited timestamp added</li>
-<li>Suggested tags removed</li>
-</ul>
+<div class="topbar">
+    <a href="index.html">← Return Home</a>
+    <div class="title">Campaign Wiki</div>
+    <div class="status-pill" id="firebaseStatus">Loading...</div>
+</div>
+
+<div class="layout">
+    <aside class="sidebar">
+        <button onclick="newEntry()" style="width:100%; margin-bottom:10px;">+ New Entry</button>
+
+        <input type="text" id="search" placeholder="Search entries..." oninput="renderEntries()">
+
+        <div class="filter-bar">
+            <button id="filterAll" onclick="setFilter('All')">All</button>
+            <button id="filterNPCs" onclick="setFilter('NPCs')">NPCs</button>
+            <button id="filterLocations" onclick="setFilter('Locations')">Locations</button>
+            <button id="filterHandouts" onclick="setFilter('Handouts')">Handouts</button>
+            <button id="filterSessionNotes" onclick="setFilter('Session Notes')">Session Notes</button>
+        </div>
+
+        <div id="sidebarEntries"></div>
+    </aside>
+
+    <main class="content">
+        <div class="form-box">
+            <div class="form-header">
+                <div>
+                    <h2>Create / Edit Entry</h2>
+                    <div class="small">Select an entry from the sidebar to edit it, or create a new one.</div>
+                </div>
+                <div class="meta">
+                    <div><strong>Created:</strong> <span id="createdDisplay">—</span></div>
+                    <div><strong>Last Edited:</strong> <span id="updatedDisplay">—</span></div>
+                </div>
+            </div>
+
+            <input type="hidden" id="editingId">
+            <input type="hidden" id="existingImageUrl">
+
+            <div class="grid2">
+                <div>
+                    <label>Category</label>
+                    <select id="category">
+                        <option>NPCs</option>
+                        <option>Locations</option>
+                        <option>Handouts</option>
+                        <option>Session Notes</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Title</label>
+                    <input type="text" id="title" placeholder="Entry title">
+                </div>
+            </div>
+
+            <label>Location</label>
+            <input type="text" id="location" placeholder="Example: Altdorf, The Crossed Pikes, Warehouse 13">
+
+            <label>Tags</label>
+            <input type="text" id="tags" placeholder="Comma separated tags">
+
+            <label>Image Upload</label>
+            <input type="file" id="imageUpload" accept="image/*">
+            <img id="preview" class="preview" alt="Uploaded preview">
+
+            <label>Notes</label>
+            <textarea id="content" placeholder="Write notes here..."></textarea>
+
+            <div class="toolbar">
+                <button onclick="saveEntry()">Save Entry</button>
+                <button class="secondary" onclick="newEntry()">Clear / New Entry</button>
+                <button class="danger" onclick="deleteEntry()">Delete Entry</button>
+                <span id="saveStatus" class="small"></span>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+    getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import {
+    getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAIZ1hiLFV60z4feJv0wC48dTrvApjuqjQ",
+  authDomain: "wfrp-enemy-within.firebaseapp.com",
+  projectId: "wfrp-enemy-within",
+  storageBucket: "wfrp-enemy-within.firebasestorage.app",
+  messagingSenderId: "349261927044",
+  appId: "1:349261927044:web:b7bec0a8eb665ef5bf68d1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+let entries = [];
+let currentFilter = "All";
+
+const els = {
+    firebaseStatus: document.getElementById("firebaseStatus"),
+    sidebarEntries: document.getElementById("sidebarEntries"),
+    search: document.getElementById("search"),
+    editingId: document.getElementById("editingId"),
+    category: document.getElementById("category"),
+    title: document.getElementById("title"),
+    location: document.getElementById("location"),
+    tags: document.getElementById("tags"),
+    content: document.getElementById("content"),
+    imageUpload: document.getElementById("imageUpload"),
+    preview: document.getElementById("preview"),
+    existingImageUrl: document.getElementById("existingImageUrl"),
+    createdDisplay: document.getElementById("createdDisplay"),
+    updatedDisplay: document.getElementById("updatedDisplay"),
+    saveStatus: document.getElementById("saveStatus")
+};
+
+function formatTimestamp(value){
+    if(!value) return "—";
+    if(value.toDate) return value.toDate().toLocaleString();
+    if(typeof value === "string") return value;
+    if(value.seconds) return new Date(value.seconds * 1000).toLocaleString();
+    return "—";
+}
+
+function escapeHtml(text){
+    return String(text ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+function setActiveFilterButton(){
+    ["All","NPCs","Locations","Handouts","Session Notes"].forEach(cat => {
+        const id = "filter" + cat.replaceAll(" ","");
+        const btn = document.getElementById(id);
+        if(btn) btn.classList.toggle("active", cat === currentFilter);
+    });
+}
+
+window.setFilter = function(filter){
+    currentFilter = filter;
+    setActiveFilterButton();
+    renderEntries();
+};
+
+window.newEntry = function(){
+    els.editingId.value = "";
+    els.category.value = "NPCs";
+    els.title.value = "";
+    els.location.value = "";
+    els.tags.value = "";
+    els.content.value = "";
+    els.imageUpload.value = "";
+    els.preview.src = "";
+    els.preview.style.display = "none";
+    els.existingImageUrl.value = "";
+    els.createdDisplay.textContent = "—";
+    els.updatedDisplay.textContent = "—";
+    els.saveStatus.textContent = "";
+};
+
+window.editEntry = function(id){
+    const entry = entries.find(e => e.id === id);
+    if(!entry) return;
+
+    els.editingId.value = entry.id;
+    els.category.value = entry.category || "NPCs";
+    els.title.value = entry.title || "";
+    els.location.value = entry.location || "";
+    els.tags.value = entry.tags || "";
+    els.content.value = entry.content || "";
+    els.existingImageUrl.value = entry.imageUrl || "";
+    els.createdDisplay.textContent = formatTimestamp(entry.createdAt);
+    els.updatedDisplay.textContent = formatTimestamp(entry.updatedAt);
+    els.saveStatus.textContent = "";
+
+    if(entry.imageUrl){
+        els.preview.src = entry.imageUrl;
+        els.preview.style.display = "block";
+    } else {
+        els.preview.src = "";
+        els.preview.style.display = "none";
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+els.imageUpload.addEventListener("change", () => {
+    const file = els.imageUpload.files[0];
+    if(!file) return;
+    els.preview.src = URL.createObjectURL(file);
+    els.preview.style.display = "block";
+});
+
+window.saveEntry = async function(){
+    const title = els.title.value.trim();
+    if(!title){
+        alert("Please enter a title.");
+        return;
+    }
+
+    els.saveStatus.textContent = "Saving...";
+
+    const id = els.editingId.value || crypto.randomUUID();
+    const existing = entries.find(e => e.id === id);
+
+    let imageUrl = els.existingImageUrl.value || "";
+
+    const file = els.imageUpload.files[0];
+    if(file){
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const imageRef = ref(storage, `wikiImages/${id}/${Date.now()}_${safeName}`);
+        await uploadBytes(imageRef, file);
+        imageUrl = await getDownloadURL(imageRef);
+    }
+
+    const data = {
+        category: els.category.value,
+        title,
+        location: els.location.value.trim(),
+        tags: els.tags.value.trim(),
+        content: els.content.value,
+        imageUrl,
+        createdAt: existing?.createdAt || serverTimestamp(),
+        updatedAt: serverTimestamp()
+    };
+
+    await setDoc(doc(db, "wikiEntries", id), data, { merge: true });
+
+    els.editingId.value = id;
+    els.existingImageUrl.value = imageUrl;
+    els.imageUpload.value = "";
+    els.saveStatus.textContent = "Saved ✓";
+};
+
+window.deleteEntry = async function(){
+    const id = els.editingId.value;
+    if(!id){
+        alert("Select an entry first.");
+        return;
+    }
+
+    const title = els.title.value || "this entry";
+    const confirmed = confirm(`Delete "${title}"? This cannot be undone.`);
+
+    if(!confirmed) return;
+
+    els.saveStatus.textContent = "Deleting...";
+    await deleteDoc(doc(db, "wikiEntries", id));
+    window.newEntry();
+    els.saveStatus.textContent = "Deleted";
+};
+
+window.renderEntries = function(){
+    const query = els.search.value.toLowerCase().trim();
+
+    let filtered = entries.slice();
+
+    if(currentFilter !== "All"){
+        filtered = filtered.filter(e => e.category === currentFilter);
+    }
+
+    if(query){
+        filtered = filtered.filter(e => {
+            return (
+                (e.title || "").toLowerCase().includes(query) ||
+                (e.location || "").toLowerCase().includes(query) ||
+                (e.tags || "").toLowerCase().includes(query) ||
+                (e.content || "").toLowerCase().includes(query)
+            );
+        });
+    }
+
+    filtered.sort((a,b) => (a.title || "").localeCompare(b.title || ""));
+
+    const grouped = {};
+    for(const entry of filtered){
+        const cat = entry.category || "Other";
+        if(!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(entry);
+    }
+
+    const order = ["NPCs","Locations","Handouts","Session Notes","Other"];
+    els.sidebarEntries.innerHTML = "";
+
+    let renderedAny = false;
+
+    for(const cat of order){
+        if(!grouped[cat] || !grouped[cat].length) continue;
+        renderedAny = true;
+
+        const section = document.createElement("div");
+        section.className = "section";
+
+        const header = document.createElement("h3");
+        header.innerHTML = `${escapeHtml(cat)} <span>${grouped[cat].length}</span>`;
+
+        const content = document.createElement("div");
+        content.className = "section-content";
+
+        header.addEventListener("click", () => {
+            content.style.display = content.style.display === "none" ? "block" : "none";
+        });
+
+        for(const entry of grouped[cat]){
+            const div = document.createElement("div");
+            div.className = "entry-link";
+            div.onclick = () => window.editEntry(entry.id);
+            div.innerHTML = `
+                <div class="entry-title">${escapeHtml(entry.title || "Untitled")}</div>
+                <div class="small">${escapeHtml(entry.location || "")}</div>
+                <div class="small">Edited: ${escapeHtml(formatTimestamp(entry.updatedAt))}</div>
+            `;
+            content.appendChild(div);
+        }
+
+        section.appendChild(header);
+        section.appendChild(content);
+        els.sidebarEntries.appendChild(section);
+    }
+
+    if(!renderedAny){
+        els.sidebarEntries.innerHTML = `<div class="empty">No entries found.</div>`;
+    }
+};
+
+onSnapshot(collection(db, "wikiEntries"), snapshot => {
+    entries = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    els.firebaseStatus.textContent = "Connected ✓";
+    renderEntries();
+}, error => {
+    console.error(error);
+    els.firebaseStatus.textContent = "Firebase error";
+    els.sidebarEntries.innerHTML = `<div class="empty">Could not load entries. Check Firebase rules.</div>`;
+});
+
+setActiveFilterButton();
+</script>
 </body>
 </html>
