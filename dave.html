@@ -62,6 +62,17 @@
     }
     button:hover, .file-label:hover { background: #913827; }
     input[type="file"] { display: none; }
+    #sheet {
+  display: none;
+}
+
+#loadingScreen {
+  padding: 60px;
+  text-align: center;
+  font-size: 28px;
+  color: var(--accent-dark);
+  font-weight: bold;
+}
     .sheet {
       background: var(--paper);
       border: 2px solid var(--line);
@@ -207,6 +218,10 @@
   </header>
 
   <main>
+    <div id="loadingScreen">
+  Loading character sheet...
+</div>
+    
     <div class="sheet" id="sheet">
       <div class="grid two">
         <section>
