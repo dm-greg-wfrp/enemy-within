@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Enemy Within Wiki</title>
+<title>Campaign Wiki</title>
 
 <style>
 :root{
@@ -32,15 +32,8 @@ body{
     gap:12px;
     border-bottom:4px solid #23170b;
 }
-.topbar a{
-    color:white;
-    text-decoration:none;
-    font-weight:bold;
-}
-.topbar .title{
-    font-size:22px;
-    font-weight:bold;
-}
+.topbar a{ color:white; text-decoration:none; font-weight:bold; }
+.topbar .title{ font-size:22px; font-weight:bold; }
 .status-pill{
     background:#2f2112;
     border:1px solid #bfa36e;
@@ -48,10 +41,7 @@ body{
     padding:6px 10px;
     font-size:13px;
 }
-.layout{
-    display:flex;
-    min-height:calc(100vh - 58px);
-}
+.layout{ display:flex; min-height:calc(100vh - 58px); }
 .sidebar{
     width:355px;
     background:#ead9aa;
@@ -59,17 +49,7 @@ body{
     padding:14px;
     overflow-y:auto;
 }
-.content{
-    flex:1;
-    padding:20px;
-    overflow-y:auto;
-}
-.toolbar{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-    margin-bottom:12px;
-}
+.content{ flex:1; padding:20px; overflow-y:auto; }
 button{
     background:var(--mid);
     color:white;
@@ -84,10 +64,7 @@ button:hover{ background:#593f23; }
 button.danger{ background:#8b2f22; }
 button.danger:hover{ background:#6f2118; }
 button.secondary{ background:#8a734e; }
-button.small-button{
-    padding:5px 8px;
-    font-size:12px;
-}
+button.small-button{ padding:5px 8px; font-size:12px; }
 input, select{
     width:100%;
     padding:9px;
@@ -98,10 +75,8 @@ input, select{
     font-size:14px;
     margin:4px 0 12px;
 }
-label{
-    font-weight:bold;
-}
-.form-box{
+label{ font-weight:bold; }
+.panel{
     background:var(--paper);
     border:3px solid var(--mid);
     border-radius:12px;
@@ -109,17 +84,15 @@ label{
     padding:18px;
     max-width:1100px;
 }
-.form-header{
+.panel-header{
     display:flex;
     justify-content:space-between;
     gap:12px;
     align-items:flex-start;
     flex-wrap:wrap;
-    margin-bottom:8px;
+    margin-bottom:10px;
 }
-.form-header h2{
-    margin:0 0 8px;
-}
+.panel-header h1, .panel-header h2{ margin:0 0 8px; }
 .meta{
     background:#e8d6a8;
     border:1px solid var(--line);
@@ -133,18 +106,20 @@ label{
     grid-template-columns:1fr 1fr;
     gap:14px;
 }
+.toolbar{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:12px 0;
+}
 .filter-bar{
     display:flex;
     flex-wrap:wrap;
     gap:6px;
     margin:8px 0 12px;
 }
-.filter-bar button.active{
-    outline:3px solid #d7b55f;
-}
-.section{
-    margin:12px 0;
-}
+.filter-bar button.active{ outline:3px solid #d7b55f; }
+.section{ margin:12px 0; }
 .section h3{
     margin:0;
     background:var(--dark);
@@ -167,24 +142,9 @@ label{
     cursor:pointer;
     border-radius:5px;
 }
-.entry-link:hover{
-    background:#e4d0a0;
-}
-.entry-title{
-    font-weight:bold;
-}
-.small{
-    color:#604a2a;
-    font-size:12px;
-}
-.preview{
-    display:none;
-    max-width:320px;
-    max-height:320px;
-    border:2px solid var(--mid);
-    border-radius:8px;
-    margin:4px 0 12px;
-}
+.entry-link:hover{ background:#e4d0a0; }
+.entry-title{ font-weight:bold; }
+.small{ color:#604a2a; font-size:12px; }
 .empty{
     color:#6b5633;
     font-style:italic;
@@ -236,22 +196,8 @@ label{
     cursor:pointer;
     font-size:12px;
 }
-.tag-pill:hover{
-    background:#4f361d;
-}
-.tag-row{
-    margin-top:4px;
-}
-.view-box{
-    margin-top:18px;
-    background:#fff5d8;
-    border:2px solid var(--mid);
-    border-radius:10px;
-    padding:14px;
-}
-.view-box h3{
-    margin-top:0;
-}
+.tag-pill:hover{ background:#4f361d; }
+.tag-row{ margin-top:4px; }
 .backlink{
     background:#e7d4aa;
     padding:8px;
@@ -259,10 +205,8 @@ label{
     margin-bottom:6px;
     cursor:pointer;
 }
-.backlink:hover{
-    background:#d5bc83;
-}
-.entry-image{
+.backlink:hover{ background:#d5bc83; }
+.entry-image, .preview{
     max-width:360px;
     max-height:360px;
     border:2px solid var(--mid);
@@ -270,12 +214,29 @@ label{
     margin:8px 0;
     display:block;
 }
+.preview{ display:none; }
 .search-help{
     font-size:12px;
     color:#604a2a;
     margin-top:-6px;
     margin-bottom:8px;
 }
+.entry-body{
+    background:#fff8df;
+    border:1px solid #d1ba88;
+    border-radius:10px;
+    padding:16px;
+    font-family:Arial, sans-serif;
+    line-height:1.5;
+    min-height:180px;
+}
+.entry-body h2, .entry-body h3{ font-family:Georgia, "Times New Roman", serif; }
+.placeholder{
+    text-align:center;
+    padding:60px 20px;
+    color:#5f4726;
+}
+#viewPanel, #editPanel{ display:none; }
 @media(max-width:850px){
     .layout{ flex-direction:column; }
     .sidebar{ width:100%; max-height:48vh; border-right:0; border-bottom:4px solid var(--mid); }
@@ -287,7 +248,7 @@ label{
 <body>
 <div class="topbar">
     <a href="index.html">← Return Home</a>
-    <div class="title">The Enemy Within Wiki</div>
+    <div class="title">Campaign Wiki</div>
     <div class="status-pill" id="firebaseStatus">Loading...</div>
 </div>
 
@@ -310,10 +271,49 @@ label{
     </aside>
 
     <main class="content">
-        <div class="form-box">
-            <div class="form-header">
+        <div id="emptyPanel" class="panel">
+            <div class="placeholder">
+                <h1>Campaign Wiki</h1>
+                <p>Select an entry from the sidebar to read it, or create a new entry.</p>
+                <button onclick="newEntry()">+ New Entry</button>
+            </div>
+        </div>
+
+        <div id="viewPanel" class="panel">
+            <div class="panel-header">
                 <div>
-                    <h2>Create / Edit Entry</h2>
+                    <h1 id="viewTitle">Untitled</h1>
+                    <div class="small">
+                        <strong>Category:</strong> <span id="viewCategory">—</span>
+                        &nbsp; | &nbsp;
+                        <strong>Location:</strong> <span id="viewLocation">—</span>
+                    </div>
+                    <div id="viewTags" class="tag-row"></div>
+                </div>
+                <div class="meta">
+                    <div><strong>Created:</strong> <span id="viewCreated">—</span></div>
+                    <div><strong>Last Edited:</strong> <span id="viewUpdated">—</span></div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <button onclick="editCurrentEntry()">Edit Entry</button>
+                <button class="secondary" onclick="newEntry()">+ New Entry</button>
+            </div>
+
+            <img id="viewImage" class="entry-image" style="display:none;" alt="Entry image">
+            <div id="viewContent" class="entry-body"></div>
+
+            <div style="margin-top:18px;">
+                <h3>Linked From</h3>
+                <div id="viewBacklinks"></div>
+            </div>
+        </div>
+
+        <div id="editPanel" class="panel">
+            <div class="panel-header">
+                <div>
+                    <h2 id="editHeading">Create / Edit Entry</h2>
                     <div class="small">Use <strong>[[Entry Name]]</strong> to link to another wiki entry.</div>
                 </div>
                 <div class="meta">
@@ -342,10 +342,10 @@ label{
             </div>
 
             <label>Location</label>
-            <input type="text" id="location" placeholder="Example: Altdorf, house, church">
+            <input type="text" id="location" placeholder="Example: Altdorf, The Crossed Pikes, Warehouse 13">
 
             <label>Tags</label>
-            <input type="text" id="tags" placeholder="Comma separated tags, e.g. noble, quest, goblin">
+            <input type="text" id="tags" placeholder="Comma separated tags, e.g. cult, noble, clue">
 
             <label>Image Upload</label>
             <input type="file" id="imageUpload" accept="image/*">
@@ -366,18 +366,12 @@ label{
             </div>
             <div id="editor" class="rich-editor" contenteditable="true" data-placeholder="Write notes here..."></div>
 
-            <div class="toolbar" style="margin-top:12px;">
+            <div class="toolbar">
                 <button onclick="saveEntry()">Save Entry</button>
+                <button class="secondary" onclick="cancelEdit()">Cancel</button>
                 <button class="secondary" onclick="newEntry()">Clear / New Entry</button>
                 <button class="danger" onclick="deleteEntry()">Delete Entry</button>
                 <span id="saveStatus" class="small"></span>
-            </div>
-
-            <div class="view-box" id="renderedBox" style="display:none;">
-                <h3>Entry Preview</h3>
-                <div id="renderedContent"></div>
-                <div id="renderedTags" class="tag-row"></div>
-                <div id="backlinksBox"></div>
             </div>
         </div>
     </main>
@@ -407,12 +401,27 @@ const storage = getStorage(app);
 
 let entries = [];
 let currentFilter = "All";
-let activeTagFilter = "";
+let currentEntryId = "";
+let currentMode = "empty";
 
 const els = {
     firebaseStatus: document.getElementById("firebaseStatus"),
     sidebarEntries: document.getElementById("sidebarEntries"),
     search: document.getElementById("search"),
+    emptyPanel: document.getElementById("emptyPanel"),
+    viewPanel: document.getElementById("viewPanel"),
+    editPanel: document.getElementById("editPanel"),
+
+    viewTitle: document.getElementById("viewTitle"),
+    viewCategory: document.getElementById("viewCategory"),
+    viewLocation: document.getElementById("viewLocation"),
+    viewTags: document.getElementById("viewTags"),
+    viewCreated: document.getElementById("viewCreated"),
+    viewUpdated: document.getElementById("viewUpdated"),
+    viewImage: document.getElementById("viewImage"),
+    viewContent: document.getElementById("viewContent"),
+    viewBacklinks: document.getElementById("viewBacklinks"),
+
     editingId: document.getElementById("editingId"),
     category: document.getElementById("category"),
     title: document.getElementById("title"),
@@ -425,11 +434,15 @@ const els = {
     createdDisplay: document.getElementById("createdDisplay"),
     updatedDisplay: document.getElementById("updatedDisplay"),
     saveStatus: document.getElementById("saveStatus"),
-    renderedBox: document.getElementById("renderedBox"),
-    renderedContent: document.getElementById("renderedContent"),
-    renderedTags: document.getElementById("renderedTags"),
-    backlinksBox: document.getElementById("backlinksBox")
+    editHeading: document.getElementById("editHeading")
 };
+
+function showMode(mode){
+    currentMode = mode;
+    els.emptyPanel.style.display = mode === "empty" ? "block" : "none";
+    els.viewPanel.style.display = mode === "view" ? "block" : "none";
+    els.editPanel.style.display = mode === "edit" ? "block" : "none";
+}
 
 function formatTimestamp(value){
     if(!value) return "—";
@@ -453,10 +466,7 @@ function normalizeTitle(title){
 }
 
 function getTagsFromInput(){
-    return els.tags.value
-        .split(",")
-        .map(t => t.trim())
-        .filter(Boolean);
+    return els.tags.value.split(",").map(t => t.trim()).filter(Boolean);
 }
 
 function tagsToString(tags){
@@ -513,7 +523,7 @@ function wireWikiLinks(container){
 window.openWikiLink = function(title){
     const entry = findEntryByTitle(title);
     if(entry){
-        window.editEntry(entry.id);
+        openEntryView(entry.id);
     } else {
         const create = confirm(`No entry named "${title}" exists. Create it now?`);
         if(create){
@@ -541,7 +551,6 @@ function generateBacklinks(targetTitle, currentId){
             }
         }
     }
-
     return backlinks;
 }
 
@@ -554,51 +563,10 @@ function renderTags(tags){
 function wireTagPills(container){
     container.querySelectorAll("[data-tag]").forEach(el => {
         el.addEventListener("click", () => {
-            activeTagFilter = el.dataset.tag;
-            els.search.value = `tag:${activeTagFilter}`;
+            els.search.value = `tag:${el.dataset.tag}`;
             renderEntries();
         });
     });
-}
-
-function updatePreview(entry){
-    if(!entry){
-        els.renderedBox.style.display = "none";
-        return;
-    }
-
-    els.renderedBox.style.display = "block";
-
-    let imageHtml = "";
-    if(entry.imageUrl){
-        imageHtml = `<img class="entry-image" src="${escapeHtml(entry.imageUrl)}" alt="Entry image">`;
-    }
-
-    els.renderedContent.innerHTML = imageHtml + renderWikiLinks(entry.content || "");
-    wireWikiLinks(els.renderedContent);
-
-    const tags = entryTags(entry);
-    els.renderedTags.innerHTML = tags.length ? renderTags(tags) : "";
-    wireTagPills(els.renderedTags);
-
-    const backlinks = generateBacklinks(entry.title, entry.id);
-
-    if(backlinks.length){
-        els.backlinksBox.innerHTML = `
-            <h3>Linked From</h3>
-            ${backlinks.map(b => `
-                <div class="backlink" data-entryid="${escapeHtml(b.id)}">
-                    <strong>${escapeHtml(b.title || "Untitled")}</strong>
-                    <div class="small">${escapeHtml(b.category || "")}</div>
-                </div>
-            `).join("")}
-        `;
-        els.backlinksBox.querySelectorAll("[data-entryid]").forEach(el => {
-            el.addEventListener("click", () => window.editEntry(el.dataset.entryid));
-        });
-    } else {
-        els.backlinksBox.innerHTML = "<h3>Linked From</h3><div class='small'>No backlinks yet.</div>";
-    }
 }
 
 function setActiveFilterButton(){
@@ -611,34 +579,69 @@ function setActiveFilterButton(){
 
 window.setFilter = function(filter){
     currentFilter = filter;
-    activeTagFilter = "";
     if(els.search.value.startsWith("tag:")) els.search.value = "";
     setActiveFilterButton();
     renderEntries();
 };
 
-window.newEntry = function(){
-    els.editingId.value = "";
-    els.category.value = "NPCs";
-    els.title.value = "";
-    els.location.value = "";
-    els.tags.value = "";
-    els.editor.innerHTML = "";
-    els.imageUpload.value = "";
-    els.preview.src = "";
-    els.preview.style.display = "none";
-    els.existingImageUrl.value = "";
-    els.createdDisplay.textContent = "—";
-    els.updatedDisplay.textContent = "—";
-    els.saveStatus.textContent = "";
-    updatePreview(null);
-};
-
-window.editEntry = function(id){
+function openEntryView(id){
     const entry = entries.find(e => e.id === id);
     if(!entry) return;
 
+    currentEntryId = id;
+
+    els.viewTitle.textContent = entry.title || "Untitled";
+    els.viewCategory.textContent = entry.category || "—";
+    els.viewLocation.textContent = entry.location || "—";
+    els.viewCreated.textContent = formatTimestamp(entry.createdAt);
+    els.viewUpdated.textContent = formatTimestamp(entry.updatedAt);
+
+    const tags = entryTags(entry);
+    els.viewTags.innerHTML = tags.length ? renderTags(tags) : "";
+    wireTagPills(els.viewTags);
+
+    if(entry.imageUrl){
+        els.viewImage.src = entry.imageUrl;
+        els.viewImage.style.display = "block";
+    } else {
+        els.viewImage.src = "";
+        els.viewImage.style.display = "none";
+    }
+
+    els.viewContent.innerHTML = renderWikiLinks(entry.content || "<em>No notes yet.</em>");
+    wireWikiLinks(els.viewContent);
+
+    const backlinks = generateBacklinks(entry.title, entry.id);
+    if(backlinks.length){
+        els.viewBacklinks.innerHTML = backlinks.map(b => `
+            <div class="backlink" data-entryid="${escapeHtml(b.id)}">
+                <strong>${escapeHtml(b.title || "Untitled")}</strong>
+                <div class="small">${escapeHtml(b.category || "")}</div>
+            </div>
+        `).join("");
+        els.viewBacklinks.querySelectorAll("[data-entryid]").forEach(el => {
+            el.addEventListener("click", () => openEntryView(el.dataset.entryid));
+        });
+    } else {
+        els.viewBacklinks.innerHTML = "<div class='small'>No backlinks yet.</div>";
+    }
+
+    showMode("view");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+window.editCurrentEntry = function(){
+    if(!currentEntryId) return;
+    openEntryEditor(currentEntryId);
+};
+
+function openEntryEditor(id){
+    const entry = entries.find(e => e.id === id);
+    if(!entry) return;
+
+    currentEntryId = id;
     els.editingId.value = entry.id;
+    els.editHeading.textContent = "Edit Entry";
     els.category.value = entry.category || "NPCs";
     els.title.value = entry.title || "";
     els.location.value = entry.location || "";
@@ -657,8 +660,35 @@ window.editEntry = function(id){
         els.preview.style.display = "none";
     }
 
-    updatePreview(entry);
+    showMode("edit");
     window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+window.newEntry = function(){
+    currentEntryId = "";
+    els.editingId.value = "";
+    els.editHeading.textContent = "Create Entry";
+    els.category.value = "NPCs";
+    els.title.value = "";
+    els.location.value = "";
+    els.tags.value = "";
+    els.editor.innerHTML = "";
+    els.imageUpload.value = "";
+    els.preview.src = "";
+    els.preview.style.display = "none";
+    els.existingImageUrl.value = "";
+    els.createdDisplay.textContent = "—";
+    els.updatedDisplay.textContent = "—";
+    els.saveStatus.textContent = "";
+    showMode("edit");
+};
+
+window.cancelEdit = function(){
+    if(currentEntryId){
+        openEntryView(currentEntryId);
+    } else {
+        showMode("empty");
+    }
 };
 
 els.imageUpload.addEventListener("change", () => {
@@ -704,38 +734,40 @@ window.saveEntry = async function(){
 
     await setDoc(doc(db, "wikiEntries", id), data, { merge: true });
 
+    currentEntryId = id;
     els.editingId.value = id;
     els.existingImageUrl.value = imageUrl;
     els.imageUpload.value = "";
     els.saveStatus.textContent = "Saved ✓";
+
+    setTimeout(() => openEntryView(id), 500);
 };
 
 window.deleteEntry = async function(){
-    const id = els.editingId.value;
+    const id = els.editingId.value || currentEntryId;
     if(!id){
         alert("Select an entry first.");
         return;
     }
 
-    const title = els.title.value || "this entry";
+    const title = els.title.value || entries.find(e => e.id === id)?.title || "this entry";
     const confirmed = confirm(`Delete "${title}"? This cannot be undone.`);
 
     if(!confirmed) return;
 
-    els.saveStatus.textContent = "Deleting...";
     await deleteDoc(doc(db, "wikiEntries", id));
+    currentEntryId = "";
     window.newEntry();
-    els.saveStatus.textContent = "Deleted";
+    showMode("empty");
 };
 
 window.renderEntries = function(){
     const rawQuery = els.search.value.trim();
     const query = rawQuery.toLowerCase();
-
     let tagQuery = "";
+
     if(query.startsWith("tag:")){
         tagQuery = query.replace("tag:","").trim();
-        activeTagFilter = tagQuery;
     }
 
     let filtered = entries.slice();
@@ -770,13 +802,11 @@ window.renderEntries = function(){
 
     const order = ["NPCs","Locations","Handouts","Session Notes","Other"];
     els.sidebarEntries.innerHTML = "";
-
     let renderedAny = false;
 
     for(const cat of order){
         if(!grouped[cat] || !grouped[cat].length) continue;
         renderedAny = true;
-
         const section = document.createElement("div");
         section.className = "section";
 
@@ -793,7 +823,7 @@ window.renderEntries = function(){
         for(const entry of grouped[cat]){
             const div = document.createElement("div");
             div.className = "entry-link";
-            div.onclick = () => window.editEntry(entry.id);
+            div.onclick = () => openEntryView(entry.id);
 
             const tags = entryTags(entry);
             div.innerHTML = `
@@ -820,14 +850,8 @@ onSnapshot(collection(db, "wikiEntries"), snapshot => {
     els.firebaseStatus.textContent = "Connected ✓";
     renderEntries();
 
-    const openId = els.editingId.value;
-    if(openId){
-        const refreshed = entries.find(e => e.id === openId);
-        if(refreshed){
-            els.createdDisplay.textContent = formatTimestamp(refreshed.createdAt);
-            els.updatedDisplay.textContent = formatTimestamp(refreshed.updatedAt);
-            updatePreview(refreshed);
-        }
+    if(currentEntryId && currentMode === "view"){
+        openEntryView(currentEntryId);
     }
 }, error => {
     console.error(error);
@@ -836,6 +860,7 @@ onSnapshot(collection(db, "wikiEntries"), snapshot => {
 });
 
 setActiveFilterButton();
+showMode("empty");
 </script>
 </body>
 </html>
