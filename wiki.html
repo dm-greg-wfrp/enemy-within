@@ -282,10 +282,159 @@ label{ font-weight:bold; }
     .sidebar{ width:100%; max-height:48vh; border-right:0; border-bottom:4px solid var(--mid); }
     .grid2{ grid-template-columns:1fr; }
 }
+
+/* Parchment password gate */
+#loginOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background:
+        radial-gradient(circle at top, rgba(255,248,220,.95), rgba(166,130,75,.92)),
+        #c9b181;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-card {
+    width: min(520px, 100%);
+    background: #f4e7c5;
+    border: 4px solid var(--mid);
+    border-radius: 18px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.35);
+    padding: 28px;
+    text-align: center;
+}
+
+.login-card h1 {
+    margin: 0 0 12px;
+    color: var(--dark);
+    font-size: 1.8rem;
+}
+
+.login-card p {
+    color: #604a2a;
+    margin-bottom: 18px;
+}
+
+.login-card input {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.login-card button {
+    width: 100%;
+    min-height: 46px;
+}
+
+.login-error {
+    min-height: 20px;
+    margin-top: 10px;
+    color: #8b2f22;
+    font-weight: bold;
+}
+
+
+/* Mobile-friendly wiki improvements */
+@media(max-width:850px){
+    .topbar {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 8px;
+    }
+
+    .layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        max-height: none;
+        border-right: 0;
+        border-bottom: 4px solid var(--mid);
+    }
+
+    .content {
+        padding: 10px;
+    }
+
+    .panel {
+        max-width: none;
+        padding: 12px;
+    }
+
+    .panel-header {
+        flex-direction: column;
+    }
+
+    .meta {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .grid2 {
+        grid-template-columns: 1fr;
+    }
+
+    button,
+    input,
+    select,
+    .rich-editor {
+        font-size: 16px;
+    }
+
+    button {
+        min-height: 44px;
+    }
+
+    .toolbar,
+    .filter-bar,
+    .editor-toolbar {
+        gap: 8px;
+    }
+
+    .entry-image,
+    .preview {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .directory-group h2,
+    .section h3 {
+        font-size: 1rem;
+    }
+
+    .placeholder {
+        padding: 28px 12px;
+    }
+
+    .login-card {
+        padding: 20px;
+    }
+
+    .login-card h1 {
+        font-size: 1.45rem;
+    }
+}
+
 </style>
 </head>
 
 <body>
+
+<div id="loginOverlay">
+    <div class="login-card">
+        <h1>Welcome to the Enemy Within Campaign Archive</h1>
+        <p>Enter the campaign password to access the wiki.</p>
+        <input id="campaignPasswordInput" type="password" placeholder="Campaign password" autocomplete="current-password">
+        <button onclick="checkCampaignPassword()">Enter</button>
+        <div id="loginError" class="login-error"></div>
+    </div>
+</div>
+
 <div class="topbar">
     <a href="index.html">← Return Home</a>
     <div class="title">Campaign Wiki</div>
@@ -988,5 +1137,42 @@ onSnapshot(collection(db, "wikiEntries"), snapshot => {
 setActiveFilterButton();
 showDirectory();
 </script>
+
+<script>
+(function () {
+    const CAMPAIGN_PASSWORD = "EnemyWithin";
+    const SESSION_KEY = "enemyWithinWikiUnlocked";
+
+    window.checkCampaignPassword = function () {
+        const input = document.getElementById("campaignPasswordInput");
+        const error = document.getElementById("loginError");
+
+        if (input && input.value === CAMPAIGN_PASSWORD) {
+            sessionStorage.setItem(SESSION_KEY, "true");
+            document.getElementById("loginOverlay").style.display = "none";
+        } else if (error) {
+            error.textContent = "Incorrect password.";
+        }
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const overlay = document.getElementById("loginOverlay");
+        const input = document.getElementById("campaignPasswordInput");
+
+        if (sessionStorage.getItem(SESSION_KEY) === "true" && overlay) {
+            overlay.style.display = "none";
+        }
+
+        if (input) {
+            input.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    window.checkCampaignPassword();
+                }
+            });
+        }
+    });
+})();
+</script>
+
 </body>
 </html>

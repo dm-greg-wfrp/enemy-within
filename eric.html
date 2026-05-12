@@ -196,7 +196,94 @@
       .sheet { box-shadow: none; border: none; }
       button, .file-label, .home-link { display: none; }
     }
-  </style>
+  
+/* Mobile-friendly character sheet improvements */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 800px) {
+  body {
+    font-size: 16px;
+  }
+
+  header {
+    position: static;
+    padding: 10px;
+  }
+
+  header .bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.2rem;
+  }
+
+  .buttons {
+    justify-content: center;
+  }
+
+  button, .file-label, .home-link {
+    min-height: 44px;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  input, textarea, select {
+    font-size: 16px;
+  }
+
+  main {
+    margin: 10px auto;
+    padding: 0 8px 28px;
+  }
+
+  .sheet {
+    padding: 10px;
+  }
+
+  section {
+    padding: 10px;
+  }
+
+  .two, .three, .four {
+    grid-template-columns: 1fr;
+  }
+
+  .header-meta {
+    text-align: center;
+  }
+
+  table {
+    min-width: 720px;
+  }
+
+  .characteristics-table {
+    min-width: 900px;
+  }
+
+  .skills-table {
+    min-width: 850px;
+  }
+
+  .weapons-table {
+    min-width: 1000px;
+  }
+
+  .record-table {
+    min-width: 850px;
+  }
+}
+
+</style>
 </head>
 <body>
   <header>
@@ -310,7 +397,8 @@
 
         <section class="full">
           <h2>Characteristics</h2>
-          <table class="characteristics-table">
+          <div class="table-wrap">
+<table class="characteristics-table">
             <thead>
               <tr><th></th><th>WS</th><th>BS</th><th>S</th><th>T</th><th>I</th><th>Agi</th><th>Dex</th><th>Int</th><th>WP</th><th>Fel</th><th>W</th></tr>
             </thead>
@@ -359,11 +447,13 @@
               </tr>
             </tbody>
           </table>
+</div>
         </section>
 
         <section class="full">
           <h2>Basic Skills</h2>
-          <table data-table="basicSkills" class="skills-table">
+          <div class="table-wrap">
+<table data-table="basicSkills" class="skills-table">
             <colgroup>
               <col class="skill-name">
               <col class="skill-char">
@@ -388,11 +478,13 @@
               </tr>
             </tfoot>
           </table>
+</div>
         </section>
 
         <section class="full">
           <h2>Advanced Skills</h2>
-          <table data-table="advancedSkills" class="skills-table">
+          <div class="table-wrap">
+<table data-table="advancedSkills" class="skills-table">
             <colgroup>
               <col class="skill-name">
               <col class="skill-char">
@@ -417,11 +509,13 @@
               </tr>
             </tfoot>
           </table>
+</div>
         </section>
 
         <section class="full">
           <h2>Talents</h2>
-          <table class="record-table">
+          <div class="table-wrap">
+<table class="record-table">
             <colgroup>
               <col class="talent-name"><col class="talent-amount"><col class="talent-desc">
             </colgroup>
@@ -445,11 +539,13 @@
               <tr><td><input data-field="talentsTable_12_0"></td><td><input data-field="talentsTable_12_1"></td><td><input data-field="talentsTable_12_2"></td></tr>
             </tbody>
           </table>
+</div>
         </section>
 
         <section class="full">
           <h2>Weapons</h2>
-          <table data-table="weapons" class="weapons-table">
+          <div class="table-wrap">
+<table data-table="weapons" class="weapons-table">
             <colgroup>
               <col class="weapon-name">
               <col class="weapon-group">
@@ -463,11 +559,13 @@
             <thead><tr><th>Weapon</th><th>Group</th><th>1H/2H</th><th>Enc</th><th>Reach/Range</th><th>Damage</th><th>Qualities</th><th>Flaws / Notes</th></tr></thead>
             <tbody></tbody>
           </table>
+</div>
         </section>
 
         <section class="full">
           <h2>Armour</h2>
-          <table class="record-table">
+          <div class="table-wrap">
+<table class="record-table">
             <colgroup>
               <col class="armour-type"><col class="armour-enc"><col class="armour-ap"><col class="armour-location"><col class="armour-qf">
             </colgroup>
@@ -484,11 +582,13 @@
               <tr><td><input data-field="armourTable_5_0"></td><td><input data-field="armourTable_5_1"></td><td><input data-field="armourTable_5_2"></td><td><input data-field="armourTable_5_3"></td><td><input data-field="armourTable_5_4"></td></tr>
             </tbody>
           </table>
+</div>
         </section>
 
         <section class="full">
           <h2>Psychology</h2>
-          <table class="record-table">
+          <div class="table-wrap">
+<table class="record-table">
             <colgroup>
               <col class="psych-type"><col class="psych-desc">
             </colgroup>
@@ -507,11 +607,13 @@
               <tr><td><input data-field="psychologyTable_7_0"></td><td><input data-field="psychologyTable_7_1"></td></tr>
             </tbody>
           </table>
+</div>
         </section>
 
         <section class="full">
           <h2>Spells and Prayers</h2>
-          <table class="record-table">
+          <div class="table-wrap">
+<table class="record-table">
             <colgroup>
               <col class="spell-name"><col class="spell-cn"><col class="spell-range"><col class="spell-target"><col class="spell-duration"><col class="spell-effect">
             </colgroup>
@@ -531,6 +633,7 @@
               <tr><td><input data-field="spellsTable_8_0"></td><td><input data-field="spellsTable_8_1"></td><td><input data-field="spellsTable_8_2"></td><td><input data-field="spellsTable_8_3"></td><td><input data-field="spellsTable_8_4"></td><td><input data-field="spellsTable_8_5"></td></tr>
             </tbody>
           </table>
+</div>
         </section>
 
         <section class="full">
