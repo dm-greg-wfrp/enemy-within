@@ -922,6 +922,149 @@ button:hover,
     color:#78d8ff !important;
 }
 
+
+/* Final dark polish: remove remaining parchment/brown UI remnants */
+body, .layout, .content {
+    background:#0f131a !important;
+}
+
+.topbar-spacer {
+    width: 220px;
+}
+
+.topbar-button,
+.status-pill {
+    border:1px solid #3f4b61 !important;
+    background:#1f2937 !important;
+    color:#f8fafc !important;
+    border-radius:10px !important;
+    padding:7px 12px !important;
+    text-decoration:none !important;
+    font-weight:bold !important;
+    font-size:13px !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-height:34px !important;
+}
+
+.topbar-button:hover,
+.status-pill:hover {
+    background:#2a3647 !important;
+    border-color:#4aa7d8 !important;
+}
+
+.meta,
+#viewPanel .meta,
+#editPanel .meta {
+    background:#1a1f2a !important;
+    border:1px solid #313b4d !important;
+    color:#dce7f7 !important;
+}
+
+#viewPanel .meta span,
+#editPanel .meta span,
+#viewPanel .meta strong,
+#editPanel .meta strong {
+    color:#dce7f7 !important;
+}
+
+.tag-pill,
+#viewTags .tag-pill,
+.tag-row .tag-pill {
+    background:#1f2937 !important;
+    border:1px solid #3f4b61 !important;
+    color:#dce7f7 !important;
+    border-radius:999px !important;
+}
+
+.tag-pill:hover {
+    border-color:#4aa7d8 !important;
+    background:#2a3647 !important;
+}
+
+.backlink,
+#viewBacklinks .backlink {
+    background:#1a1f2a !important;
+    border:1px solid #313b4d !important;
+    color:#e8edf7 !important;
+}
+
+.backlink:hover,
+#viewBacklinks .backlink:hover {
+    background:#202635 !important;
+    border-color:#4aa7d8 !important;
+}
+
+.dashboard-entry-card .tag-pill {
+    background:#1f2937 !important;
+    border:1px solid #3f4b61 !important;
+    color:#dce7f7 !important;
+}
+
+.dashboard-list-title,
+#dashboardTypeTitle {
+    color:#ffffff !important;
+}
+
+#dashboardTypeSubtitle {
+    color:#9ca7b7 !important;
+}
+
+#emptyPanel {
+    background:#11151c !important;
+    color:#e8edf7 !important;
+    border:1px solid #263241 !important;
+}
+
+#emptyPanel h1 {
+    color:#ffffff !important;
+}
+
+#emptyPanel .placeholder {
+    color:#dce7f7 !important;
+}
+
+.entry-body {
+    background:#1a1f2a !important;
+    border:1px solid #313b4d !important;
+    color:#e8edf7 !important;
+}
+
+.entry-body * {
+    color:inherit;
+}
+
+button.danger {
+    background:#3a1f24 !important;
+    border-color:#71313b !important;
+}
+
+button.danger:hover {
+    background:#532832 !important;
+    border-color:#e05263 !important;
+}
+
+@media(max-width:850px){
+    .topbar-spacer {
+        display:none;
+    }
+
+    .topbar {
+        align-items:center;
+    }
+
+    .topbar-actions {
+        width:100%;
+    }
+
+    .topbar-button,
+    .topbar-actions button,
+    .status-pill {
+        flex:1 1 auto;
+    }
+}
+
 </style>
 </head>
 
@@ -938,12 +1081,10 @@ button:hover,
 </div>
 
 <div class="topbar">
-    <div class="topbar-link-group">
-        <a href="#" onclick="returnHomeDashboard(); return false;">← Return Home</a>
-        <a href="index.html">Return to Character Sheets</a>
-    </div>
+    <div class="topbar-spacer"></div>
     <div class="title">Campaign Wiki</div>
     <div class="topbar-actions">
+        <a class="topbar-button" href="index.html">Return to Character Sheets</a>
         <button onclick="newEntry()">+ New Entry</button>
         <button onclick="exportWikiData()">Export Backup</button>
         <div class="status-pill" id="firebaseStatus">Loading...</div>
@@ -1048,6 +1189,7 @@ button:hover,
             </div>
 
             <div class="toolbar">
+                <button onclick="returnHomeDashboard()">← Return Home</button>
                 <button onclick="editCurrentEntry()">Edit Entry</button>
                 <button class="secondary" onclick="newEntry()">+ New Entry</button>
             </div>
