@@ -804,6 +804,30 @@ label{ font-weight:bold; }
     }
 }
 
+
+/* Dark trim to match dashboard */
+body {
+    background:#0f131a !important;
+}
+
+.topbar {
+    background:#11151c !important;
+    border-bottom:1px solid #263241 !important;
+    box-shadow:0 3px 12px rgba(0,0,0,.35);
+}
+
+.content {
+    background:#0f131a !important;
+}
+
+.layout {
+    background:#0f131a !important;
+}
+
+.dashboard-panel {
+    border-color:#263241 !important;
+}
+
 </style>
 </head>
 
@@ -1277,6 +1301,8 @@ function openEntryView(id){
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+window.openEntryView = openEntryView;
+
 window.editCurrentEntry = function(){
     if(!currentEntryId) return;
     openEntryEditor(currentEntryId);
@@ -1310,6 +1336,8 @@ function openEntryEditor(id){
     showMode("edit");
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
+
+window.openEntryEditor = openEntryEditor;
 
 window.newEntry = function(){
     currentEntryId = "";
@@ -1487,7 +1515,7 @@ function renderDashboard(){
         const updated = getEntryUpdatedDate(entry);
 
         return `
-            <div class="recent-card" onclick="openEntryView('${entry.id}')">
+            <div class="recent-card" onclick="window.openEntryView('${entry.id}')">
                 <div class="dashboard-icon ${iconClass}">${icon}</div>
                 <div>
                     <div class="recent-title">${escapeHtml(entry.title || "Untitled")}</div>
@@ -1531,7 +1559,7 @@ window.filterDashboardTag = function(tag){
     els.dashboardTypeSubtitle.textContent = `${filtered.length} entr${filtered.length === 1 ? "y" : "ies"} with this tag`;
 
     els.dashboardTypeEntries.innerHTML = filtered.length ? filtered.map(entry => `
-        <div class="dashboard-entry-card" onclick="openEntryView('${entry.id}')">
+        <div class="dashboard-entry-card" onclick="window.openEntryView('${entry.id}')">
             <div class="dashboard-entry-title">${escapeHtml(entry.title || "Untitled")}</div>
             <div class="dashboard-entry-meta">${escapeHtml(entry.category || "")} ${entry.location ? "• " + escapeHtml(entry.location) : ""}</div>
         </div>
@@ -1566,7 +1594,7 @@ window.syncDashboardSearch = function(value){
     els.dashboardTypeEntries.innerHTML = filtered.length ? filtered.map(entry => {
         const tags = entryTags(entry);
         return `
-            <div class="dashboard-entry-card" onclick="openEntryView('${entry.id}')">
+            <div class="dashboard-entry-card" onclick="window.openEntryView('${entry.id}')">
                 <div class="dashboard-entry-title">${escapeHtml(entry.title || "Untitled")}</div>
                 <div class="dashboard-entry-meta">${escapeHtml(entry.category || "")} ${entry.location ? "• " + escapeHtml(entry.location) : ""}</div>
                 ${tags.length ? `<div class="tag-row">${tags.slice(0,5).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(" ")}</div>` : ""}
@@ -1589,7 +1617,7 @@ window.showTypeList = function(type){
     els.dashboardTypeEntries.innerHTML = filtered.length ? filtered.map(entry => {
         const tags = entryTags(entry);
         return `
-            <div class="dashboard-entry-card" onclick="openEntryView('${entry.id}')">
+            <div class="dashboard-entry-card" onclick="window.openEntryView('${entry.id}')">
                 <div class="dashboard-entry-title">${escapeHtml(entry.title || "Untitled")}</div>
                 <div class="dashboard-entry-meta">${escapeHtml(entry.location || "")}</div>
                 <div class="dashboard-entry-meta">Edited: ${escapeHtml(formatTimestamp(entry.updatedAt))}</div>
