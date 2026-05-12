@@ -828,6 +828,100 @@ body {
     border-color:#263241 !important;
 }
 
+
+/* Dark entry view/editor theme */
+.panel:not(.dashboard-panel):not(#emptyPanel) {
+    background:#11151c !important;
+    color:#e8edf7 !important;
+    border:1px solid #263241 !important;
+    border-radius:16px !important;
+    box-shadow:0 16px 36px rgba(0,0,0,.35);
+}
+
+.panel:not(.dashboard-panel):not(#emptyPanel) h1,
+.panel:not(.dashboard-panel):not(#emptyPanel) h2,
+.panel:not(.dashboard-panel):not(#emptyPanel) h3,
+.panel:not(.dashboard-panel):not(#emptyPanel) strong {
+    color:#ffffff !important;
+}
+
+.panel:not(.dashboard-panel):not(#emptyPanel) .small,
+.panel:not(.dashboard-panel):not(#emptyPanel) .meta,
+.panel:not(.dashboard-panel):not(#emptyPanel) .recent-meta {
+    color:#9ca7b7 !important;
+}
+
+.panel:not(.dashboard-panel):not(#emptyPanel) .section,
+.panel:not(.dashboard-panel):not(#emptyPanel) .entry-body,
+.panel:not(.dashboard-panel):not(#emptyPanel) .linked-card,
+.panel:not(.dashboard-panel):not(#emptyPanel) .meta-box {
+    background:#1a1f2a !important;
+    border:1px solid #313b4d !important;
+    color:#e8edf7 !important;
+}
+
+.panel:not(.dashboard-panel):not(#emptyPanel) input,
+.panel:not(.dashboard-panel):not(#emptyPanel) textarea,
+.panel:not(.dashboard-panel):not(#emptyPanel) select,
+.panel:not(.dashboard-panel):not(#emptyPanel) .rich-editor {
+    background:#0f131a !important;
+    border:1px solid #313b4d !important;
+    color:#ffffff !important;
+}
+
+.panel:not(.dashboard-panel):not(#emptyPanel) input::placeholder,
+.panel:not(.dashboard-panel):not(#emptyPanel) textarea::placeholder {
+    color:#8d99aa !important;
+}
+
+button,
+.secondary,
+.toolbar button,
+.editor-toolbar button,
+.topbar-actions button,
+.panel button {
+    border:1px solid #3f4b61 !important;
+    background:#1f2937 !important;
+    color:#f8fafc !important;
+    border-radius:10px !important;
+}
+
+button:hover,
+.secondary:hover,
+.toolbar button:hover,
+.editor-toolbar button:hover,
+.topbar-actions button:hover,
+.panel button:hover {
+    background:#2a3647 !important;
+    border-color:#4aa7d8 !important;
+}
+
+.entry-image {
+    border:1px solid #313b4d !important;
+}
+
+#viewPanel a,
+#editPanel a {
+    color:#78d8ff !important;
+}
+
+.topbar-link-group {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.topbar-link-group a {
+    color:#dce7f7 !important;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.topbar-link-group a:hover {
+    color:#78d8ff !important;
+}
+
 </style>
 </head>
 
@@ -844,7 +938,10 @@ body {
 </div>
 
 <div class="topbar">
-    <a href="index.html">← Return Home</a>
+    <div class="topbar-link-group">
+        <a href="#" onclick="returnHomeDashboard(); return false;">← Return Home</a>
+        <a href="index.html">Return to Character Sheets</a>
+    </div>
     <div class="title">Campaign Wiki</div>
     <div class="topbar-actions">
         <button onclick="newEntry()">+ New Entry</button>
@@ -1605,6 +1702,13 @@ window.syncDashboardSearch = function(value){
     els.dashboardTypeList.style.display = "block";
 };
 
+
+
+window.returnHomeDashboard = function(){
+    showDirectory();
+    hideTypeList();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+};
 
 window.showTypeList = function(type){
     const filtered = entries
