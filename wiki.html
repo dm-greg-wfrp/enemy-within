@@ -684,6 +684,126 @@ label{ font-weight:bold; }
     }
 }
 
+
+/* Integrated dashboard-only layout */
+.sidebar {
+    display: none !important;
+}
+
+.layout {
+    display: block;
+    min-height: calc(100vh - 58px);
+}
+
+.content {
+    width: 100%;
+    padding: 20px;
+}
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.topbar-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.topbar-actions button {
+    border: 1px solid #bfa36e;
+    background: #6f512f;
+    color: white;
+    border-radius: 999px;
+    padding: 7px 12px;
+    min-height: auto;
+    font-size: 13px;
+}
+
+.topbar-actions button:hover {
+    background: #8a6539;
+}
+
+.dashboard-panel {
+    margin: 0 auto;
+}
+
+.dashboard-list-panel {
+    margin-top: 14px;
+    background:#11151c;
+    color:#e8edf7;
+    border:1px solid #263241;
+    border-radius:10px;
+    padding:12px;
+}
+
+.dashboard-list-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    border-bottom:1px solid #374151;
+    padding-bottom:10px;
+    margin-bottom:10px;
+}
+
+.dashboard-list-title {
+    font-size:1.2rem;
+    font-weight:bold;
+}
+
+.dashboard-list-grid {
+    display:grid;
+    grid-template-columns:repeat(3, minmax(180px, 1fr));
+    gap:10px;
+}
+
+.dashboard-entry-card {
+    background:#1a1f2a;
+    border:1px solid #313b4d;
+    border-radius:7px;
+    padding:12px;
+    cursor:pointer;
+    min-height:78px;
+}
+
+.dashboard-entry-card:hover {
+    border-color:#4aa7d8;
+    background:#202635;
+}
+
+.dashboard-entry-title {
+    color:#fff;
+    font-weight:bold;
+    font-size:14px;
+}
+
+.dashboard-entry-meta {
+    color:#9ca7b7;
+    font-size:11px;
+    margin-top:5px;
+    font-family:Arial, sans-serif;
+}
+
+@media(max-width:1000px){
+    .dashboard-list-grid {
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:850px){
+    .content {
+        padding: 10px;
+    }
+
+    .topbar-actions {
+        justify-content:center;
+    }
+}
+
 </style>
 </head>
 
@@ -702,7 +822,11 @@ label{ font-weight:bold; }
 <div class="topbar">
     <a href="index.html">← Return Home</a>
     <div class="title">Campaign Wiki</div>
-    <div class="status-pill" id="firebaseStatus">Loading...</div>
+    <div class="topbar-actions">
+        <button onclick="newEntry()">+ New Entry</button>
+        <button onclick="exportWikiData()">Export Backup</button>
+        <div class="status-pill" id="firebaseStatus">Loading...</div>
+    </div>
 </div>
 
 <div class="layout">
@@ -716,12 +840,12 @@ label{ font-weight:bold; }
 
         <div class="filter-bar">
             <button id="filterAll" onclick="setFilter('All')">All</button>
-            <button id="filterLocations" onclick="setFilter('Locations')">Locations</button>
-            <button id="filterNPCs" onclick="setFilter('NPCs')">NPCs</button>
-            <button id="filterCharacters" onclick="setFilter('Characters')">Characters</button>
-            <button id="filterEnemies" onclick="setFilter('Enemies')">Enemies</button>
-            <button id="filterHandouts" onclick="setFilter('Handouts')">Handouts</button>
-            <button id="filterSessionNotes" onclick="setFilter('Session Notes')">Session Notes</button>
+            <button id="filterLocations" onclick="showTypeList('Locations')">Locations</button>
+            <button id="filterNPCs" onclick="showTypeList('NPCs')">NPCs</button>
+            <button id="filterCharacters" onclick="showTypeList('Characters')">Characters</button>
+            <button id="filterEnemies" onclick="showTypeList('Enemies')">Enemies</button>
+            <button id="filterHandouts" onclick="showTypeList('Handouts')">Handouts</button>
+            <button id="filterSessionNotes" onclick="showTypeList('Session Notes')">Session Notes</button>
         </div>
 
         <div id="sidebarEntries"></div>
@@ -732,12 +856,12 @@ label{ font-weight:bold; }
         <div id="directoryPanel" class="panel dashboard-panel">
             <div class="dashboard-tabs">
                 <button class="dashboard-tab active" onclick="showDirectory()">Dashboard</button>
-                <button class="dashboard-tab" onclick="setFilter('Characters')">Characters</button>
-                <button class="dashboard-tab" onclick="setFilter('NPCs')">NPCs</button>
-                <button class="dashboard-tab" onclick="setFilter('Enemies')">Enemies</button>
-                <button class="dashboard-tab" onclick="setFilter('Locations')">Locations</button>
-                <button class="dashboard-tab" onclick="setFilter('Handouts')">Handouts</button>
-                <button class="dashboard-tab" onclick="setFilter('Session Notes')">Session Notes</button>
+                <button class="dashboard-tab" onclick="showTypeList('Characters')">Characters</button>
+                <button class="dashboard-tab" onclick="showTypeList('NPCs')">NPCs</button>
+                <button class="dashboard-tab" onclick="showTypeList('Enemies')">Enemies</button>
+                <button class="dashboard-tab" onclick="showTypeList('Locations')">Locations</button>
+                <button class="dashboard-tab" onclick="showTypeList('Handouts')">Handouts</button>
+                <button class="dashboard-tab" onclick="showTypeList('Session Notes')">Session Notes</button>
             </div>
 
             <div class="dashboard-section-title">
@@ -759,6 +883,18 @@ label{ font-weight:bold; }
                 <span>⌕</span>
                 <input type="text" id="dashboardSearch" placeholder="Search knowledge base titles, text, locations, tags..." oninput="syncDashboardSearch(this.value)">
                 <span>›</span>
+            </div>
+
+
+            <div id="dashboardTypeList" class="dashboard-list-panel" style="display:none;">
+                <div class="dashboard-list-header">
+                    <div>
+                        <div id="dashboardTypeTitle" class="dashboard-list-title">Entries</div>
+                        <div id="dashboardTypeSubtitle" class="small">Alphabetical list</div>
+                    </div>
+                    <button class="secondary" onclick="hideTypeList()">Back to Dashboard</button>
+                </div>
+                <div id="dashboardTypeEntries" class="dashboard-list-grid"></div>
             </div>
 
             <div id="directoryContent" style="display:none;"></div>
@@ -913,6 +1049,10 @@ const els = {
     dashboardTags: document.getElementById("dashboardTags"),
     dashboardTagCount: document.getElementById("dashboardTagCount"),
     dashboardSearch: document.getElementById("dashboardSearch"),
+    dashboardTypeList: document.getElementById("dashboardTypeList"),
+    dashboardTypeTitle: document.getElementById("dashboardTypeTitle"),
+    dashboardTypeSubtitle: document.getElementById("dashboardTypeSubtitle"),
+    dashboardTypeEntries: document.getElementById("dashboardTypeEntries"),
     viewPanel: document.getElementById("viewPanel"),
     editPanel: document.getElementById("editPanel"),
 
@@ -1303,6 +1443,7 @@ function timeAgo(date){
 }
 
 function renderDashboard(){
+    if(els.dashboardTypeList) els.dashboardTypeList.style.display = "none";
     const categories = [
         {name:"Characters", icon:"⚔", cls:"characters", subtitle:"Player characters"},
         {name:"NPCs", icon:"☷", cls:"npcs", subtitle:"People in the world"},
@@ -1315,7 +1456,7 @@ function renderDashboard(){
     els.dashboardCategories.innerHTML = categories.map(cat => {
         const count = entries.filter(e => e.category === cat.name).length;
         return `
-            <div class="dashboard-card" onclick="setFilter('${cat.name}')">
+            <div class="dashboard-card" onclick="showTypeList('${cat.name}')">
                 <div class="dashboard-card-top">
                     <div class="dashboard-icon ${cat.cls}">${cat.icon}</div>
                     <div class="dashboard-card-count">${count}</div>
@@ -1380,17 +1521,92 @@ function renderDashboard(){
 }
 
 window.filterDashboardTag = function(tag){
-    els.search.value = `tag:${tag}`;
+    const filtered = entries
+        .filter(entry => entryTags(entry).some(t => t.toLowerCase() === tag.toLowerCase()))
+        .sort((a,b) => (a.title || "").localeCompare(b.title || ""));
+
     if(els.dashboardSearch) els.dashboardSearch.value = `tag:${tag}`;
-    renderEntries();
-    currentFilter = "All";
-    setActiveFilterButton();
+
+    els.dashboardTypeTitle.textContent = `Tag: ${tag}`;
+    els.dashboardTypeSubtitle.textContent = `${filtered.length} entr${filtered.length === 1 ? "y" : "ies"} with this tag`;
+
+    els.dashboardTypeEntries.innerHTML = filtered.length ? filtered.map(entry => `
+        <div class="dashboard-entry-card" onclick="openEntryView('${entry.id}')">
+            <div class="dashboard-entry-title">${escapeHtml(entry.title || "Untitled")}</div>
+            <div class="dashboard-entry-meta">${escapeHtml(entry.category || "")} ${entry.location ? "• " + escapeHtml(entry.location) : ""}</div>
+        </div>
+    `).join("") : `<div class="empty">No entries for this tag.</div>`;
+
+    els.dashboardTypeList.style.display = "block";
+    showMode("directory");
 };
 
 window.syncDashboardSearch = function(value){
     els.search.value = value;
-    renderEntries();
+    const query = value.trim().toLowerCase();
+
+    if(!query){
+        hideTypeList();
+        return;
+    }
+
+    let filtered = entries.filter(e => {
+        const tags = entryTags(e).map(t => t.toLowerCase());
+        return (
+            (e.title || "").toLowerCase().includes(query) ||
+            (e.location || "").toLowerCase().includes(query) ||
+            tags.some(tag => tag.includes(query)) ||
+            stripHtml(e.content || "").toLowerCase().includes(query)
+        );
+    }).sort((a,b) => (a.title || "").localeCompare(b.title || ""));
+
+    els.dashboardTypeTitle.textContent = "Search Results";
+    els.dashboardTypeSubtitle.textContent = `${filtered.length} result${filtered.length === 1 ? "" : "s"} for "${value}"`;
+
+    els.dashboardTypeEntries.innerHTML = filtered.length ? filtered.map(entry => {
+        const tags = entryTags(entry);
+        return `
+            <div class="dashboard-entry-card" onclick="openEntryView('${entry.id}')">
+                <div class="dashboard-entry-title">${escapeHtml(entry.title || "Untitled")}</div>
+                <div class="dashboard-entry-meta">${escapeHtml(entry.category || "")} ${entry.location ? "• " + escapeHtml(entry.location) : ""}</div>
+                ${tags.length ? `<div class="tag-row">${tags.slice(0,5).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(" ")}</div>` : ""}
+            </div>
+        `;
+    }).join("") : `<div class="empty">No matching entries.</div>`;
+
+    els.dashboardTypeList.style.display = "block";
 };
+
+
+window.showTypeList = function(type){
+    const filtered = entries
+        .filter(entry => entry.category === type)
+        .sort((a,b) => (a.title || "").localeCompare(b.title || ""));
+
+    els.dashboardTypeTitle.textContent = type;
+    els.dashboardTypeSubtitle.textContent = `${filtered.length} entr${filtered.length === 1 ? "y" : "ies"} listed alphabetically`;
+
+    els.dashboardTypeEntries.innerHTML = filtered.length ? filtered.map(entry => {
+        const tags = entryTags(entry);
+        return `
+            <div class="dashboard-entry-card" onclick="openEntryView('${entry.id}')">
+                <div class="dashboard-entry-title">${escapeHtml(entry.title || "Untitled")}</div>
+                <div class="dashboard-entry-meta">${escapeHtml(entry.location || "")}</div>
+                <div class="dashboard-entry-meta">Edited: ${escapeHtml(formatTimestamp(entry.updatedAt))}</div>
+                ${tags.length ? `<div class="tag-row">${tags.slice(0,5).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(" ")}</div>` : ""}
+            </div>
+        `;
+    }).join("") : `<div class="empty">No ${escapeHtml(type)} entries yet.</div>`;
+
+    els.dashboardTypeList.style.display = "block";
+    showMode("directory");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+window.hideTypeList = function(){
+    if(els.dashboardTypeList) els.dashboardTypeList.style.display = "none";
+};
+
 
 window.renderEntries = function(){
     const rawQuery = els.search.value.trim();
