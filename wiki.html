@@ -1116,6 +1116,12 @@ button.danger:hover {
     <main class="content">
 
         <div id="directoryPanel" class="panel dashboard-panel">
+
+            <div class="dashboard-search-row">
+                <span>⌕</span>
+                <input type="text" id="dashboardSearch" placeholder="Search knowledge base titles, text, locations, tags..." oninput="syncDashboardSearch(this.value)">
+                <span>›</span>
+            </div>
             
             <div class="dashboard-section-title">
                 By Type <span class="dashboard-count">6 Types</span>
@@ -1131,14 +1137,7 @@ button.danger:hover {
                 By Tag <span id="dashboardTagCount" class="dashboard-count">0 Total</span>
             </div>
             <div id="dashboardTags" class="tag-dashboard-grid"></div>
-
-            <div class="dashboard-search-row">
-                <span>⌕</span>
-                <input type="text" id="dashboardSearch" placeholder="Search knowledge base titles, text, locations, tags..." oninput="syncDashboardSearch(this.value)">
-                <span>›</span>
-            </div>
-
-
+            
             <div id="dashboardTypeList" class="dashboard-list-panel" style="display:none;">
                 <div class="dashboard-list-header">
                     <div>
@@ -1180,10 +1179,11 @@ button.danger:hover {
             </div>
 
             <div class="toolbar">
-                <button onclick="returnHomeDashboard()">← Return Home</button>
-                <button onclick="editCurrentEntry()">Edit Entry</button>
-                <button class="secondary" onclick="newEntry()">+ New Entry</button>
-            </div>
+    <button onclick="returnHomeDashboard()">← Return Home</button>
+    <button onclick="editCurrentEntry()">Edit Entry</button>
+    <button class="secondary" onclick="newEntry()">+ New Entry</button>
+    <button class="danger" onclick="deleteCurrentEntry()">Delete Entry</button>
+</div>
 
             <img id="viewImage" class="entry-image" style="display:none;" alt="Entry image">
             <div id="viewContent" class="entry-body"></div>
@@ -1538,6 +1538,35 @@ window.editCurrentEntry = function(){
     openEntryEditor(currentEntryId);
 };
 
+window.deleteCurrentEntry = async function () {
+
+    if (!currentEntryId) return;
+
+    const confirmed = confirm(
+        "Are you sure you want to permanently delete this entry?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+
+        await deleteDoc(doc(db, "wikiEntries", currentEntryId));
+
+        currentEntryId = null;
+
+        returnHomeDashboard();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Failed to delete entry.");
+
+    }
+};
+
+
+    
 function openEntryEditor(id){
     const entry = entries.find(e => e.id === id);
     if(!entry) return;
