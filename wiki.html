@@ -444,7 +444,8 @@ label{ font-weight:bold; }
 <div class="layout">
     <aside class="sidebar">
         <button onclick="newEntry()" style="width:100%; margin-bottom:8px;">+ New Entry</button>
-        <button class="secondary" onclick="showDirectory()" style="width:100%; margin-bottom:10px;">Browse All Entries</button>
+        <button class="secondary" onclick="showDirectory()" style="width:100%; margin-bottom:8px;">Browse All Entries</button>
+        <button class="secondary" onclick="exportWikiData()" style="width:100%; margin-bottom:10px;">Export Backup</button>
 
         <input type="text" id="search" placeholder="Search title, text, location, tags..." oninput="renderEntries()">
         <div class="search-help">Tip: click a tag pill to filter by tag.</div>
@@ -1138,7 +1139,7 @@ onSnapshot(collection(db, "wikiEntries"), snapshot => {
 setActiveFilterButton();
 showDirectory();
 
-async function exportWikiData() {
+window.exportWikiData = async function() {
 
     try {
 
