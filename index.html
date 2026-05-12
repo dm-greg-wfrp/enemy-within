@@ -6,12 +6,17 @@
   <title>Enemy Within Character Sheets</title>
   <style>
     :root {
-      --ink: #2a1709;
-      --brown: #5f3214;
-      --gold: #b88435;
-      --dark: #120b07;
-      --parchment: #e7cf9f;
-      --parchment-light: #f4e3b8;
+      --bg: #0f131a;
+      --panel: #11151c;
+      --card: #1a1f2a;
+      --card-hover: #202635;
+      --line: #313b4d;
+      --line-bright: #4aa7d8;
+      --text: #e8edf7;
+      --muted: #9ca7b7;
+      --accent: #78d8ff;
+      --button: #1f2937;
+      --button-hover: #2a3647;
     }
 
     * { box-sizing: border-box; }
@@ -20,10 +25,10 @@
       margin: 0;
       min-height: 100vh;
       font-family: Georgia, "Times New Roman", serif;
-      color: var(--ink);
+      color: var(--text);
       background:
-        radial-gradient(circle at top, rgba(255, 226, 159, 0.25), transparent 30%),
-        linear-gradient(135deg, #1a0f09, #3a2416 45%, #110906);
+        radial-gradient(circle at top, rgba(74,167,216,0.16), transparent 32%),
+        linear-gradient(135deg, #0f131a, #11151c 45%, #05070a);
       padding: 28px;
     }
 
@@ -31,14 +36,10 @@
       max-width: 1180px;
       margin: 0 auto;
       padding: clamp(24px, 4vw, 48px);
-      background:
-        radial-gradient(circle at 20% 10%, rgba(255,255,255,0.35), transparent 18%),
-        radial-gradient(circle at 80% 20%, rgba(90,43,13,0.15), transparent 22%),
-        radial-gradient(circle at 30% 80%, rgba(90,43,13,0.12), transparent 24%),
-        linear-gradient(180deg, var(--parchment-light), var(--parchment));
-      border: 7px double #6d421f;
+      background: var(--panel);
+      border: 1px solid #263241;
       border-radius: 18px;
-      box-shadow: 0 24px 70px rgba(0,0,0,0.55), inset 0 0 60px rgba(92,47,20,0.25);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.55);
       position: relative;
       overflow: hidden;
     }
@@ -48,10 +49,9 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background-image:
-        repeating-linear-gradient(0deg, rgba(75,42,17,0.035) 0 1px, transparent 1px 8px),
-        repeating-linear-gradient(90deg, rgba(75,42,17,0.025) 0 1px, transparent 1px 10px);
-      mix-blend-mode: multiply;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(120,216,255,0.08), transparent 24%),
+        radial-gradient(circle at 80% 20%, rgba(74,167,216,0.08), transparent 24%);
     }
 
     header, .grid, footer { position: relative; z-index: 1; }
@@ -64,8 +64,7 @@
     h1 {
       margin: 0;
       font-size: clamp(2.2rem, 5vw, 4.2rem);
-      color: #3b1e0b;
-      text-shadow: 0 2px 0 rgba(255,255,255,0.28);
+      color: #ffffff;
       letter-spacing: 0.035em;
     }
 
@@ -74,14 +73,14 @@
       max-width: 700px;
       font-size: 1.15rem;
       line-height: 1.45;
-      color: #593319;
+      color: var(--muted);
     }
 
     .divider {
       width: min(620px, 85%);
-      height: 2px;
+      height: 1px;
       margin: 22px auto 0;
-      background: linear-gradient(90deg, transparent, #6a3b19, transparent);
+      background: linear-gradient(90deg, transparent, var(--line-bright), transparent);
     }
 
     .grid {
@@ -94,27 +93,28 @@
       display: block;
       text-decoration: none;
       color: inherit;
-      background: rgba(72, 36, 13, 0.12);
-      border: 2px solid rgba(80, 43, 18, 0.55);
+      background: var(--card);
+      border: 1px solid var(--line);
       border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 9px 22px rgba(66, 32, 10, 0.28);
-      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      box-shadow: 0 9px 22px rgba(0,0,0,0.28);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
     }
 
     .character-card:hover,
     .character-card:focus-visible {
       transform: translateY(-4px);
-      box-shadow: 0 16px 34px rgba(66, 32, 10, 0.38);
-      border-color: var(--gold);
+      box-shadow: 0 16px 34px rgba(0,0,0,0.38);
+      border-color: var(--line-bright);
+      background: var(--card-hover);
       outline: none;
     }
 
     .portrait-wrap {
       aspect-ratio: 1 / 1;
-      background: #2a1709;
+      background: #05070a;
       overflow: hidden;
-      border-bottom: 2px solid rgba(80, 43, 18, 0.55);
+      border-bottom: 1px solid var(--line);
     }
 
     .portrait-wrap img {
@@ -133,37 +133,15 @@
     .label {
       padding: 14px 12px 16px;
       text-align: center;
-      background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(80, 43, 18, 0.08));
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.08));
     }
 
     .label h2 {
       margin: 0;
       font-size: 1.45rem;
-      color: #331805;
+      color: #ffffff;
     }
 
-.wiki-link-large {
-    display: block;
-    text-align: center;
-    margin: 30px auto;
-    font-size: 2rem;
-    font-weight: bold;
-    color: #f4e7c5;
-    text-decoration: none;
-    background: #5b3a1e;
-    border: 3px solid #d4b483;
-    border-radius: 14px;
-    padding: 18px 28px;
-    width: fit-content;
-    box-shadow: 0 4px 12px rgba(0,0,0,.3);
-    transition: all 0.2s ease;
-}
-
-.wiki-link-large:hover {
-    background: #744a26;
-    transform: scale(1.03);
-}
-  
     .label span {
       display: inline-block;
       margin-top: 6px;
@@ -172,13 +150,36 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #744115;
+      color: var(--accent);
+    }
+
+    .wiki-link-large {
+      display: block;
+      text-align: center;
+      margin: 30px auto 0;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #f8fafc;
+      text-decoration: none;
+      background: var(--button);
+      border: 1px solid #3f4b61;
+      border-radius: 14px;
+      padding: 18px 28px;
+      width: fit-content;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      transition: all 0.2s ease;
+    }
+
+    .wiki-link-large:hover {
+      background: var(--button-hover);
+      border-color: var(--line-bright);
+      transform: scale(1.03);
     }
 
     footer {
       margin-top: 34px;
       text-align: center;
-      color: #5c3518;
+      color: var(--muted);
       font-size: 0.95rem;
     }
 
@@ -186,6 +187,10 @@
       body { padding: 14px; }
       .parchment { padding: 20px; }
       .grid { grid-template-columns: 1fr; }
+      .wiki-link-large {
+        width: 100%;
+        font-size: 1.45rem;
+      }
     }
   </style>
 </head>
