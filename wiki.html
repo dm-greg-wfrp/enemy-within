@@ -479,6 +479,7 @@ label{ font-weight:bold; }
                 <h1>Campaign Wiki</h1>
                 <p>Select an entry from the sidebar to read it, or create a new entry.</p>
                 <button onclick="newEntry()">+ New Entry</button>
+                <button onclick="exportWikiData()">Export Backup</button>
             </div>
         </div>
 
@@ -586,7 +587,7 @@ label{ font-weight:bold; }
  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
-    getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, serverTimestamp
+    getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, serverTimestamp, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import {
     getStorage, ref, uploadBytes, getDownloadURL
@@ -1136,6 +1137,64 @@ onSnapshot(collection(db, "wikiEntries"), snapshot => {
 
 setActiveFilterButton();
 showDirectory();
+
+async function exportWikiData() {
+
+    try {
+
+       const snapshot = await getDocs(collection(db, "wikiEntries"));
+
+        const entries = [];
+
+        snapshot.forEach(doc => {
+            entries.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        const backup = {
+            exportedAt: new Date().toISOString(),
+            totalEntries: entries.length,
+            entries: entries
+        };
+
+        const json = JSON.stringify(backup, null, 2);
+
+        const blob = new Blob([json], {
+            type: "application/json"
+        });
+
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+
+        const timestamp = new Date()
+            .toISOString()
+            .replace(/[:.]/g, "-");
+
+        a.href = url;
+        a.download = `enemy-within-wiki-backup-${timestamp}.json`;
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+
+        alert(`Exported ${entries.length} wiki entries.`);
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Failed to export wiki backup.");
+
+    }
+}
+    
 </script>
 
 <script>
