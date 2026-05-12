@@ -142,6 +142,28 @@
       color: #331805;
     }
 
+.wiki-link-large {
+    display: block;
+    text-align: center;
+    margin: 30px auto;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #f4e7c5;
+    text-decoration: none;
+    background: #5b3a1e;
+    border: 3px solid #d4b483;
+    border-radius: 14px;
+    padding: 18px 28px;
+    width: fit-content;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    transition: all 0.2s ease;
+}
+
+.wiki-link-large:hover {
+    background: #744a26;
+    transform: scale(1.03);
+}
+  
     .label span {
       display: inline-block;
       margin-top: 6px;
@@ -203,7 +225,11 @@
      
     </section>
 
-    <footer><a href="wiki.html">Campaign Wiki</a></footer>
+    <footer>
+      <a class="wiki-link-large" href="wiki.html">
+    Campaign Wiki
+</a>
+    </footer>
   </main>
 </body>
 </html>
