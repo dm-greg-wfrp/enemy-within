@@ -186,18 +186,6 @@ label{ font-weight:bold; }
     color:#8b2f22;
     text-decoration-style:dashed;
 }
-.tag-pill{
-    display:inline-block;
-    background:#6f512f;
-    color:white;
-    padding:4px 8px;
-    border-radius:999px;
-    margin:2px;
-    cursor:pointer;
-    font-size:12px;
-}
-.tag-pill:hover{ background:#4f361d; }
-.tag-row{ margin-top:4px; }
 .backlink{
     background:#e7d4aa;
     padding:8px;
@@ -596,51 +584,6 @@ label{ font-weight:bold; }
     text-overflow:ellipsis;
 }
 
-.tag-dashboard-grid {
-    display:grid;
-    grid-template-columns:repeat(5, minmax(130px, 1fr));
-    gap:10px;
-}
-
-.tag-dashboard-card {
-    background:#1a1f2a;
-    border:1px solid #313b4d;
-    border-radius:7px;
-    padding:12px;
-    cursor:pointer;
-    min-height:76px;
-    position:relative;
-}
-
-.tag-dashboard-card:hover {
-    border-color:#4aa7d8;
-    background:#202635;
-}
-
-.tag-dot {
-    width:7px;
-    height:7px;
-    border-radius:50%;
-    display:inline-block;
-    margin-right:8px;
-    background:#3ba7ff;
-}
-
-.tag-count {
-    position:absolute;
-    right:10px;
-    top:10px;
-    color:#cbd5e1;
-    font-size:12px;
-}
-
-.tag-title {
-    margin-top:20px;
-    color:#ffffff;
-    font-weight:bold;
-    font-size:13px;
-}
-
 .dashboard-search-row {
     margin-top:14px;
     background:#0f131a;
@@ -672,14 +615,10 @@ label{ font-weight:bold; }
     .recent-grid {
         grid-template-columns:1fr;
     }
-    .tag-dashboard-grid {
-        grid-template-columns:repeat(2, minmax(130px, 1fr));
-    }
 }
 
 @media(max-width:600px){
-    .dashboard-category-grid,
-    .tag-dashboard-grid {
+    .dashboard-category-grid {
         grid-template-columns:1fr;
     }
 }
@@ -969,20 +908,6 @@ body, .layout, .content {
     color:#dce7f7 !important;
 }
 
-.tag-pill,
-#viewTags .tag-pill,
-.tag-row .tag-pill {
-    background:#1f2937 !important;
-    border:1px solid #3f4b61 !important;
-    color:#dce7f7 !important;
-    border-radius:999px !important;
-}
-
-.tag-pill:hover {
-    border-color:#4aa7d8 !important;
-    background:#2a3647 !important;
-}
-
 .backlink,
 #viewBacklinks .backlink {
     background:#1a1f2a !important;
@@ -994,12 +919,6 @@ body, .layout, .content {
 #viewBacklinks .backlink:hover {
     background:#202635 !important;
     border-color:#4aa7d8 !important;
-}
-
-.dashboard-entry-card .tag-pill {
-    background:#1f2937 !important;
-    border:1px solid #3f4b61 !important;
-    color:#dce7f7 !important;
 }
 
 .dashboard-list-title,
@@ -1129,8 +1048,8 @@ button.danger:hover {
         <button class="secondary" onclick="showDirectory()" style="width:100%; margin-bottom:8px;">Browse All Entries</button>
         <button class="secondary" onclick="exportWikiData()" style="width:100%; margin-bottom:10px;">Export Backup</button>
 
-        <input type="text" id="search" placeholder="Search title, text, location, tags..." oninput="renderEntries()">
-        <div class="search-help">Tip: click a tag pill to filter by tag.</div>
+        <input type="text" id="search" placeholder="Search title, text, location..." oninput="renderEntries()">
+        <div class="search-help">Search by title, text, or location.</div>
 
         <div class="filter-bar">
             <button id="filterAll" onclick="setFilter('All')">All</button>
@@ -1151,7 +1070,7 @@ button.danger:hover {
 
             <div class="dashboard-search-row">
                 <span>⌕</span>
-                <input type="text" id="dashboardSearch" placeholder="Search knowledge base titles, text, locations, tags..." oninput="syncDashboardSearch(this.value)">
+                <input type="text" id="dashboardSearch" placeholder="Search knowledge base titles, text, locations..." oninput="syncDashboardSearch(this.value)">
                 <span>›</span>
             </div>
             
@@ -1164,11 +1083,6 @@ button.danger:hover {
                 Recently Edited <span class="dashboard-count">6</span>
             </div>
             <div id="dashboardRecent" class="recent-grid"></div>
-
-            <div class="dashboard-section-title">
-                By Tag <span id="dashboardTagCount" class="dashboard-count">0 Total</span>
-            </div>
-            <div id="dashboardTags" class="tag-dashboard-grid"></div>
             
             <div id="dashboardTypeList" class="dashboard-list-panel" style="display:none;">
                 <div class="dashboard-list-header">
@@ -1202,7 +1116,6 @@ button.danger:hover {
                         &nbsp; | &nbsp;
                         <strong>Location:</strong> <span id="viewLocation">—</span>
                     </div>
-                    <div id="viewTags" class="tag-row"></div>
                 </div>
                 <div class="meta">
                     <div><strong>Created:</strong> <span id="viewCreated">—</span></div>
@@ -1261,9 +1174,6 @@ button.danger:hover {
 
             <label>Location</label>
             <input type="text" id="location" placeholder="Example: Altdorf, the Reik, Horse and Coaches Inn">
-
-            <label>Tags</label>
-            <input type="text" id="tags" placeholder="Example: city, goblin, quest, merchant, river">
 
             <label>Image Upload</label>
             <input type="file" id="imageUpload" accept="image/*">
@@ -1337,8 +1247,6 @@ const els = {
     directoryContent: document.getElementById("directoryContent"),
     dashboardCategories: document.getElementById("dashboardCategories"),
     dashboardRecent: document.getElementById("dashboardRecent"),
-    dashboardTags: document.getElementById("dashboardTags"),
-    dashboardTagCount: document.getElementById("dashboardTagCount"),
     dashboardSearch: document.getElementById("dashboardSearch"),
     dashboardTypeList: document.getElementById("dashboardTypeList"),
     dashboardTypeTitle: document.getElementById("dashboardTypeTitle"),
@@ -1350,7 +1258,6 @@ const els = {
     viewTitle: document.getElementById("viewTitle"),
     viewCategory: document.getElementById("viewCategory"),
     viewLocation: document.getElementById("viewLocation"),
-    viewTags: document.getElementById("viewTags"),
     viewCreated: document.getElementById("viewCreated"),
     viewUpdated: document.getElementById("viewUpdated"),
     viewImage: document.getElementById("viewImage"),
@@ -1361,7 +1268,6 @@ const els = {
     category: document.getElementById("category"),
     title: document.getElementById("title"),
     location: document.getElementById("location"),
-    tags: document.getElementById("tags"),
     editor: document.getElementById("editor"),
     imageUpload: document.getElementById("imageUpload"),
     preview: document.getElementById("preview"),
@@ -1401,22 +1307,6 @@ function normalizeTitle(title){
     return String(title || "").trim().toLowerCase();
 }
 
-function getTagsFromInput(){
-    return els.tags.value.split(",").map(t => t.trim()).filter(Boolean);
-}
-
-function tagsToString(tags){
-    if(Array.isArray(tags)) return tags.join(", ");
-    return tags || "";
-}
-
-function entryTags(entry){
-    if(Array.isArray(entry.tags)) return entry.tags;
-    if(typeof entry.tags === "string"){
-        return entry.tags.split(",").map(t => t.trim()).filter(Boolean);
-    }
-    return [];
-}
 
 function stripHtml(html){
     const div = document.createElement("div");
@@ -1515,20 +1405,6 @@ function generateBacklinks(targetTitle, currentId){
     return backlinks;
 }
 
-function renderTags(tags){
-    return tags.map(tag =>
-        `<span class="tag-pill" data-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</span>`
-    ).join(" ");
-}
-
-function wireTagPills(container){
-    container.querySelectorAll("[data-tag]").forEach(el => {
-        el.addEventListener("click", () => {
-            els.search.value = `tag:${el.dataset.tag}`;
-            renderEntries();
-        });
-    });
-}
 
 function setActiveFilterButton(){
     ["All","Locations","NPCs","Characters","Enemies","Handouts","Session Notes"].forEach(cat => {
@@ -1540,8 +1416,6 @@ function setActiveFilterButton(){
 
 window.setFilter = function(filter){
     currentFilter = filter;
-    if(els.search.value.startsWith("tag:")) els.search.value = "";
-    if(els.dashboardSearch && els.dashboardSearch.value.startsWith("tag:")) els.dashboardSearch.value = "";
     setActiveFilterButton();
     renderEntries();
     showMode("directory");
@@ -1558,12 +1432,7 @@ function openEntryView(id){
     els.viewLocation.textContent = entry.location || "—";
     els.viewCreated.textContent = formatTimestamp(entry.createdAt);
     els.viewUpdated.textContent = formatTimestamp(entry.updatedAt);
-
-    const tags = entryTags(entry);
-    els.viewTags.innerHTML = tags.length ? renderTags(tags) : "";
-    wireTagPills(els.viewTags);
-
-    if(entry.imageUrl){
+if(entry.imageUrl){
         els.viewImage.src = entry.imageUrl;
         els.viewImage.onclick = () => window.openImageModal(entry.imageUrl);
         els.viewImage.title = "Click to enlarge";
@@ -1643,7 +1512,6 @@ function openEntryEditor(id){
     els.category.value = entry.category || "NPCs";
     els.title.value = entry.title || "";
     els.location.value = entry.location || "";
-    els.tags.value = tagsToString(entry.tags);
     els.editor.innerHTML = entry.content || "";
     els.existingImageUrl.value = entry.imageUrl || "";
     els.createdDisplay.textContent = formatTimestamp(entry.createdAt);
@@ -1671,7 +1539,6 @@ window.newEntry = function(){
     els.category.value = "NPCs";
     els.title.value = "";
     els.location.value = "";
-    els.tags.value = "";
     els.editor.innerHTML = "";
     els.imageUpload.value = "";
     els.preview.src = "";
@@ -1724,7 +1591,6 @@ window.saveEntry = async function(){
         category: els.category.value,
         title,
         location: els.location.value.trim(),
-        tags: getTagsFromInput(),
         content: els.editor.innerHTML,
         textContent: stripHtml(els.editor.innerHTML),
         imageUrl,
@@ -1850,49 +1716,8 @@ function renderDashboard(){
             </div>
         `;
     }).join("") : `<div class="empty">No recently edited entries yet.</div>`;
-
-    const tagMap = {};
-    for(const entry of entries){
-        for(const tag of entryTags(entry)){
-            if(!tagMap[tag]) tagMap[tag] = [];
-            tagMap[tag].push(entry);
-        }
-    }
-
-    const tags = Object.keys(tagMap).sort((a,b) => tagMap[b].length - tagMap[a].length || a.localeCompare(b));
-    els.dashboardTagCount.textContent = `${tags.length} Total`;
-
-    const colors = ["#e23c7a", "#3587e8", "#b83ce8", "#e83c3c", "#36b36f", "#e0a424", "#38bdf8", "#9ca3af"];
-
-    els.dashboardTags.innerHTML = tags.length ? tags.map((tag, index) => `
-        <div class="tag-dashboard-card" onclick="filterDashboardTag('${escapeHtml(tag)}')">
-            <span class="tag-dot" style="background:${colors[index % colors.length]}"></span>
-            <span class="tag-count">${tagMap[tag].length}</span>
-            <div class="tag-title">${escapeHtml(tag)}</div>
-        </div>
-    `).join("") : `<div class="empty">No tags yet.</div>`;
 }
 
-window.filterDashboardTag = function(tag){
-    const filtered = entries
-        .filter(entry => entryTags(entry).some(t => t.toLowerCase() === tag.toLowerCase()))
-        .sort((a,b) => (a.title || "").localeCompare(b.title || ""));
-
-    if(els.dashboardSearch) els.dashboardSearch.value = `tag:${tag}`;
-
-    els.dashboardTypeTitle.textContent = `Tag: ${tag}`;
-    els.dashboardTypeSubtitle.textContent = `${filtered.length} entr${filtered.length === 1 ? "y" : "ies"} with this tag`;
-
-    els.dashboardTypeEntries.innerHTML = filtered.length ? filtered.map(entry => `
-        <div class="dashboard-entry-card" onclick="window.openEntryView('${entry.id}')">
-            <div class="dashboard-entry-title">${escapeHtml(entry.title || "Untitled")}</div>
-            <div class="dashboard-entry-meta">${escapeHtml(entry.category || "")} ${entry.location ? "• " + escapeHtml(entry.location) : ""}</div>
-        </div>
-    `).join("") : `<div class="empty">No entries for this tag.</div>`;
-
-    els.dashboardTypeList.style.display = "block";
-    showMode("directory");
-};
 
 window.syncDashboardSearch = function(value){
     els.search.value = value;
@@ -1904,11 +1729,9 @@ window.syncDashboardSearch = function(value){
     }
 
     let filtered = entries.filter(e => {
-        const tags = entryTags(e).map(t => t.toLowerCase());
         return (
             (e.title || "").toLowerCase().includes(query) ||
             (e.location || "").toLowerCase().includes(query) ||
-            tags.some(tag => tag.includes(query)) ||
             stripHtml(e.content || "").toLowerCase().includes(query)
         );
     }).sort((a,b) => (a.title || "").localeCompare(b.title || ""));
@@ -1917,19 +1740,16 @@ window.syncDashboardSearch = function(value){
     els.dashboardTypeSubtitle.textContent = `${filtered.length} result${filtered.length === 1 ? "" : "s"} for "${value}"`;
 
     els.dashboardTypeEntries.innerHTML = filtered.length ? filtered.map(entry => {
-        const tags = entryTags(entry);
         return `
             <div class="dashboard-entry-card" onclick="window.openEntryView('${entry.id}')">
                 <div class="dashboard-entry-title">${escapeHtml(entry.title || "Untitled")}</div>
                 <div class="dashboard-entry-meta">${escapeHtml(entry.category || "")} ${entry.location ? "• " + escapeHtml(entry.location) : ""}</div>
-                ${tags.length ? `<div class="tag-row">${tags.slice(0,5).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(" ")}</div>` : ""}
             </div>
         `;
     }).join("") : `<div class="empty">No matching entries.</div>`;
 
     els.dashboardTypeList.style.display = "block";
 };
-
 
 
 window.returnHomeDashboard = function(){
@@ -1947,13 +1767,11 @@ window.showTypeList = function(type){
     els.dashboardTypeSubtitle.textContent = `${filtered.length} entr${filtered.length === 1 ? "y" : "ies"} listed alphabetically`;
 
     els.dashboardTypeEntries.innerHTML = filtered.length ? filtered.map(entry => {
-        const tags = entryTags(entry);
         return `
             <div class="dashboard-entry-card" onclick="window.openEntryView('${entry.id}')">
                 <div class="dashboard-entry-title">${escapeHtml(entry.title || "Untitled")}</div>
                 <div class="dashboard-entry-meta">${escapeHtml(entry.location || "")}</div>
                 <div class="dashboard-entry-meta">Edited: ${escapeHtml(formatTimestamp(entry.updatedAt))}</div>
-                ${tags.length ? `<div class="tag-row">${tags.slice(0,5).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(" ")}</div>` : ""}
             </div>
         `;
     }).join("") : `<div class="empty">No ${escapeHtml(type)} entries yet.</div>`;
@@ -1971,13 +1789,7 @@ window.hideTypeList = function(){
 window.renderEntries = function(){
     const rawQuery = els.search.value.trim();
     const query = rawQuery.toLowerCase();
-    let tagQuery = "";
-
-    if(query.startsWith("tag:")){
-        tagQuery = query.replace("tag:","").trim();
-    }
-
-    let filtered = entries.slice();
+let filtered = entries.slice();
 
     if(currentFilter !== "All"){
         filtered = filtered.filter(e => e.category === currentFilter);
@@ -1985,14 +1797,9 @@ window.renderEntries = function(){
 
     if(query){
         filtered = filtered.filter(e => {
-            const tags = entryTags(e).map(t => t.toLowerCase());
-            if(tagQuery){
-                return tags.some(t => t.includes(tagQuery));
-            }
             return (
                 (e.title || "").toLowerCase().includes(query) ||
                 (e.location || "").toLowerCase().includes(query) ||
-                tags.some(tag => tag.includes(query)) ||
                 stripHtml(e.content || "").toLowerCase().includes(query)
             );
         });
@@ -2031,13 +1838,10 @@ window.renderEntries = function(){
             const div = document.createElement("div");
             div.className = "entry-link";
             div.onclick = () => openEntryView(entry.id);
-
-            const tags = entryTags(entry);
             div.innerHTML = `
                 <div class="entry-title">${escapeHtml(entry.title || "Untitled")}</div>
                 <div class="small">${escapeHtml(entry.location || "")}</div>
                 <div class="small">Edited: ${escapeHtml(formatTimestamp(entry.updatedAt))}</div>
-                <div class="tag-row">${tags.slice(0,4).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(" ")}</div>
             `;
             content.appendChild(div);
         }
