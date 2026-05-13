@@ -1065,6 +1065,38 @@ button.danger:hover {
     }
 }
 
+
+/* Click-to-enlarge entry images */
+.image-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    cursor: zoom-out;
+}
+
+.image-modal-content {
+    max-width: 95vw;
+    max-height: 95vh;
+    border-radius: 10px;
+    box-shadow: 0 0 40px rgba(0,0,0,.8);
+    object-fit: contain;
+}
+
+.entry-image {
+    cursor: zoom-in;
+    transition: transform .15s ease, border-color .15s ease;
+}
+
+.entry-image:hover {
+    transform: scale(1.01);
+    border-color: #4aa7d8 !important;
+}
+
 </style>
 </head>
 
@@ -1261,6 +1293,11 @@ button.danger:hover {
             </div>
         </div>
     </main>
+</div>
+
+
+<div id="imageModal" class="image-modal" onclick="closeImageModal()">
+    <img id="modalImage" class="image-modal-content" alt="Expanded entry image">
 </div>
 
 <script type="module">
@@ -1503,9 +1540,13 @@ function openEntryView(id){
 
     if(entry.imageUrl){
         els.viewImage.src = entry.imageUrl;
+        els.viewImage.onclick = () => window.openImageModal(entry.imageUrl);
+        els.viewImage.title = "Click to enlarge";
         els.viewImage.style.display = "block";
     } else {
         els.viewImage.src = "";
+        els.viewImage.onclick = null;
+        els.viewImage.removeAttribute("title");
         els.viewImage.style.display = "none";
     }
 
