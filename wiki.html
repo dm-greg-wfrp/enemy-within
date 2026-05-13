@@ -1424,6 +1424,31 @@ function stripHtml(html){
     return div.textContent || div.innerText || "";
 }
 
+
+window.openImageModal = function(src) {
+    const modal = document.getElementById("imageModal");
+    const img = document.getElementById("modalImage");
+
+    if (!modal || !img || !src) return;
+
+    img.src = src;
+    modal.style.display = "flex";
+};
+
+window.closeImageModal = function() {
+    const modal = document.getElementById("imageModal");
+    const img = document.getElementById("modalImage");
+
+    if (modal) modal.style.display = "none";
+    if (img) img.src = "";
+};
+
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") {
+        window.closeImageModal();
+    }
+});
+
 window.formatText = function(command, value = null){
     document.execCommand(command, false, value);
     els.editor.focus();
