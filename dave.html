@@ -154,6 +154,18 @@
     .skills-table col.skill-adv { width: 14%; }
     .skills-table col.skill-total { width: 14%; }
     .skills-table col.skill-notes { width: 14%; }
+    .skills-table col.skill-action { width: 8%; }
+    .delete-skill-button {
+      background: #7b2e1f;
+      color: #fff;
+      border: 1px solid #5f2318;
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: .78rem;
+      cursor: pointer;
+      width: 100%;
+    }
+    .delete-skill-button:hover { background: #9a3827; }
     .weapons-table col.weapon-name { width: 22%; }
     .weapons-table col.weapon-group { width: 10%; }
     .weapons-table col.weapon-hands { width: 7%; }
@@ -266,7 +278,7 @@
   }
 
   .characteristics-table {
-    min-width: 900px;
+    min-width: 820px;
   }
 
   .skills-table {
@@ -399,7 +411,7 @@
           <div class="table-wrap">
 <table class="characteristics-table">
             <thead>
-              <tr><th></th><th>WS</th><th>BS</th><th>S</th><th>T</th><th>I</th><th>Agi</th><th>Dex</th><th>Int</th><th>WP</th><th>Fel</th><th>W</th></tr>
+              <tr><th></th><th>WS</th><th>BS</th><th>S</th><th>T</th><th>I</th><th>Agi</th><th>Dex</th><th>Int</th><th>WP</th><th>Fel</th></tr>
             </thead>
             <tbody>
               <tr>
@@ -414,7 +426,6 @@
                 <td><input type="number" data-field="charInt" value="50"></td>
                 <td><input type="number" data-field="charWP" value="30"></td>
                 <td><input type="number" data-field="charFel" value="50"></td>
-                <td><input type="number" data-field="charW" value="15"></td>
               </tr>
               <tr>
                 <th>Advances</th>
@@ -428,7 +439,6 @@
                 <td><input type="number" data-field="advInt" value="0"></td>
                 <td><input type="number" data-field="advWP" value="0"></td>
                 <td><input type="number" data-field="advFel" value="0"></td>
-                <td><input type="number" data-field="advW" value="0"></td>
               </tr>
               <tr>
                 <th>Current</th>
@@ -442,7 +452,6 @@
                 <td><input type="number" data-field="curInt" readonly></td>
                 <td><input type="number" data-field="curWP" readonly></td>
                 <td><input type="number" data-field="curFel" readonly></td>
-                <td><input type="number" data-field="curW" readonly></td>
               </tr>
             </tbody>
           </table>
@@ -460,12 +469,13 @@
               <col class="skill-adv">
               <col class="skill-total">
               <col class="skill-notes">
+              <col class="skill-action">
             </colgroup>
-            <thead><tr><th>Parent Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th></tr></thead>
+            <thead><tr><th>Parent Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th><th>Delete</th></tr></thead>
             <tbody></tbody>
             <tfoot>
               <tr>
-                <td colspan="6">
+                <td colspan="7">
                   <div class="add-row-controls">
                     <label>Add Basic Grouped Skill
                       <select id="addBasicGroupedSkill" onchange="addSkillFromSelect('basicSkills', this)">
@@ -491,12 +501,13 @@
               <col class="skill-adv">
               <col class="skill-total">
               <col class="skill-notes">
+              <col class="skill-action">
             </colgroup>
-            <thead><tr><th>Parent Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th></tr></thead>
+            <thead><tr><th>Parent Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th><th>Delete</th></tr></thead>
             <tbody></tbody>
             <tfoot>
               <tr>
-                <td colspan="6">
+                <td colspan="7">
                   <div class="add-row-controls">
                     <label>Add Advanced Skill
                       <select id="addAdvancedSkill" onchange="addSkillFromSelect('advancedSkills', this)">
@@ -1743,8 +1754,54 @@
         td.appendChild(input);
         tr.appendChild(td);
       });
+
+      const actionTd = document.createElement("td");
+      if (isCustom) {
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "delete-skill-button";
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", () => deleteSkillRow(deleteButton));
+        actionTd.appendChild(deleteButton);
+      } else {
+        actionTd.textContent = "—";
+        actionTd.style.textAlign = "center";
+        actionTd.style.color = "var(--muted)";
+      }
+      tr.appendChild(actionTd);
+
       tbody.appendChild(tr);
     }
+
+    function deleteSkillRow(button) {
+      const row = button.closest("tr");
+      if (!row) return;
+
+      const name = row.querySelector('[data-field$="_name"]')?.value || "this skill";
+      const notes = row.querySelector('[data-field$="_notes"]')?.value || "";
+      const label = notes ? `${name} (${notes})` : name;
+
+      if (!confirm(`Delete ${label}?`)) return;
+
+      row.remove();
+      reindexCustomSkillRows(row.dataset.tableName);
+      updateCalculatedFields();
+      setStatus(`Deleted ${label}.`, "unsaved", false);
+      scheduleAutoSave();
+    }
+
+    window.deleteSkillRow = deleteSkillRow;
+
+    function reindexCustomSkillRows(tableName) {
+      const rows = document.querySelectorAll(`[data-table="${tableName}"] tbody .custom-skill-row`);
+      rows.forEach((row, index) => {
+        row.querySelectorAll("[data-field]").forEach(input => {
+          input.dataset.field = input.dataset.field.replace(new RegExp(`${tableName}_custom_\\d+_`), `${tableName}_custom_${index}_`);
+        });
+      });
+    }
+
+
 
     function makeBasicSkillRows() {
       const tbody = document.querySelector('[data-table="basicSkills"] tbody');
@@ -1890,7 +1947,7 @@
     }
 
     function updateCharacteristics() {
-      const stats = ["WS", "BS", "S", "T", "I", "Agi", "Dex", "Int", "WP", "Fel", "W"];
+      const stats = ["WS", "BS", "S", "T", "I", "Agi", "Dex", "Int", "WP", "Fel"];
       stats.forEach(stat => {
         const starting = Number(document.querySelector(`[data-field="char${stat}"]`)?.value || 0);
         const advances = Number(document.querySelector(`[data-field="adv${stat}"]`)?.value || 0);
