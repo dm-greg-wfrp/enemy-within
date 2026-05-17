@@ -421,7 +421,7 @@
             <div class="grid three">
               <label>Current XP<input type="number" data-field="xpCurrent" value="95"></label>
               <label>Spent XP<input type="number" data-field="xpSpent" value="0"></label>
-              <label>Total XP<input type="number" data-field="xpTotal" value="95"></label>
+              <label>Total XP<input type="number" data-field="xpTotal" value="95" readonly></label>
             </div>
             <div class="grid two">
               <label>Fate<input type="number" data-field="fate" value="3"></label>
@@ -1858,38 +1858,39 @@
 
 
     // Correct WFRP4e Skill Advance XP Cost Ladder.
-    // Non-career skills cost double.
+    // Uses the NEXT advance number; non-career skills cost double.
     function getAdvanceCost(advances, isCareerSkill) {
-      const adv = Number(advances) || 0;
+      const currentAdvances = Number(advances) || 0;
+      const nextAdvance = currentAdvances + 1;
       let cost = 0;
 
-      if (adv <= 5) {
+      if (nextAdvance <= 5) {
         cost = 10;
-      } else if (adv <= 10) {
+      } else if (nextAdvance <= 10) {
         cost = 15;
-      } else if (adv <= 15) {
+      } else if (nextAdvance <= 15) {
         cost = 20;
-      } else if (adv <= 20) {
+      } else if (nextAdvance <= 20) {
         cost = 30;
-      } else if (adv <= 25) {
+      } else if (nextAdvance <= 25) {
         cost = 40;
-      } else if (adv <= 30) {
+      } else if (nextAdvance <= 30) {
         cost = 60;
-      } else if (adv <= 35) {
+      } else if (nextAdvance <= 35) {
         cost = 80;
-      } else if (adv <= 40) {
+      } else if (nextAdvance <= 40) {
         cost = 110;
-      } else if (adv <= 45) {
+      } else if (nextAdvance <= 45) {
         cost = 140;
-      } else if (adv <= 50) {
+      } else if (nextAdvance <= 50) {
         cost = 180;
-      } else if (adv <= 55) {
+      } else if (nextAdvance <= 55) {
         cost = 220;
-      } else if (adv <= 60) {
+      } else if (nextAdvance <= 60) {
         cost = 270;
-      } else if (adv <= 65) {
+      } else if (nextAdvance <= 65) {
         cost = 320;
-      } else if (adv <= 70) {
+      } else if (nextAdvance <= 70) {
         cost = 380;
       } else {
         cost = 440;
@@ -2332,10 +2333,24 @@
     }
 
     function updateCalculatedFields() {
+      // existing calculations
       updateCharacteristics();
       updateMovementAndEncumbrance();
       updateSkills();
       updateWeapons();
+
+ // Total XP = Current XP + Spent XP
+    const currentXP = Number(
+        document.querySelector('[data-field="xpCurrent"]').value
+    ) || 0;
+
+    const spentXP = Number(
+        document.querySelector('[data-field="xpSpent"]').value
+    ) || 0;
+
+    document.querySelector('[data-field="xpTotal"]').value =
+        currentXP + spentXP;
+      
     }
 
     async function saveSheet(options = {}) {
