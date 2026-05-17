@@ -2104,6 +2104,7 @@
       if (photoField) photoField.value = "";
 
       document.querySelectorAll(".career-skill-checkbox").forEach(cb => cb.checked = false);
+      applyCareerSkillStates(data);
       refreshCareerSkillHighlights();
       applyCharacterPortrait("");
       await saveSheet();
@@ -2114,6 +2115,16 @@
     window.removeCharacterPortrait = removeCharacterPortrait;
 
 
+
+
+    function applyCareerSkillStates(data = {}) {
+      document.querySelectorAll(".career-skill-checkbox").forEach(checkbox => {
+        const field = checkbox.dataset.field;
+        checkbox.checked = !!data[field];
+        const row = checkbox.closest("tr");
+        if (row) row.classList.toggle("career-skill-row", checkbox.checked);
+      });
+    }
 
     function refreshCareerSkillHighlights() {
       document.querySelectorAll(".career-skill-checkbox").forEach(checkbox => {
