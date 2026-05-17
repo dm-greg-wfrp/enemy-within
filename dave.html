@@ -156,13 +156,16 @@
     .skills-table col.skill-notes { width: 14%; }
 
     .skills-table col.skill-career { width: 10%; }
-    .skills-table tr.career-skill-row td {
+    .skills-table tr.career-skill-row td,
+    .skills-table tr.career-skill-row th {
       background: #1c7867 !important;
-      color: #fff;
     }
-    .skills-table tr.career-skill-row input {
-      color: #fff;
-      font-weight: bold;
+
+    .skills-table tr.career-skill-row input,
+    .skills-table tr.career-skill-row td,
+    .skills-table tr.career-skill-row th {
+      color: inherit !important;
+      font-weight: inherit;
     }
     .career-skill-checkbox {
       width: auto;
