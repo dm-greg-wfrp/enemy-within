@@ -155,7 +155,8 @@
     .skills-table col.skill-total { width: 14%; }
     .skills-table col.skill-notes { width: 14%; }
 
-    .skills-table col.skill-career { width: 10%; }
+    .skills-table col.skill-career { width: 9%; }
+    .skills-table col.skill-xp { width: 10%; }
     .skills-table tr.career-skill-row td,
     .skills-table tr.career-skill-row th {
       background: #469385 !important;
@@ -552,13 +553,14 @@
               <col class="skill-total">
               <col class="skill-notes">
               <col class="skill-career">
+              <col class="skill-xp">
               <col class="skill-action">
             </colgroup>
-            <thead><tr><th>Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th><th>Career Skill?</th><th>Delete</th></tr></thead>
+            <thead><tr><th>Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th><th>Career Skill?</th><th>Advance Cost (XP)</th><th>Delete</th></tr></thead>
             <tbody></tbody>
             <tfoot>
               <tr>
-                <td colspan="8">
+                <td colspan="9">
                   <div class="add-row-controls">
                     <label>Add Basic Grouped Skill
                       <select id="addBasicGroupedSkill" onchange="addSkillFromSelect('basicSkills', this)">
@@ -585,13 +587,14 @@
               <col class="skill-total">
               <col class="skill-notes">
               <col class="skill-career">
+              <col class="skill-xp">
               <col class="skill-action">
             </colgroup>
-            <thead><tr><th>Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th><th>Career Skill?</th><th>Delete</th></tr></thead>
+            <thead><tr><th>Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th><th>Career Skill?</th><th>Advance Cost (XP)</th><th>Delete</th></tr></thead>
             <tbody></tbody>
             <tfoot>
               <tr>
-                <td colspan="8">
+                <td colspan="9">
                   <div class="add-row-controls">
                     <label>Add Advanced Skill
                       <select id="addAdvancedSkill" onchange="addSkillFromSelect('advancedSkills', this)">
@@ -1853,6 +1856,53 @@
       return input;
     }
 
+
+    function getAdvanceCost(advances, isCareerSkill) {
+      const adv = Number(advances) || 0;
+      let cost = 0;
+
+      if (adv < 5) {
+        cost = 10;
+      } else if (adv < 10) {
+        cost = 15;
+      } else if (adv < 15) {
+        cost = 20;
+      } else if (adv < 20) {
+        cost = 30;
+      } else if (adv < 25) {
+        cost = 40;
+      } else if (adv < 30) {
+        cost = 50;
+      } else if (adv < 35) {
+        cost = 60;
+      } else if (adv < 40) {
+        cost = 70;
+      } else {
+        cost = 80;
+      }
+
+      if (!isCareerSkill) {
+        cost *= 2;
+      }
+
+      return cost;
+    }
+
+    function updateSkillAdvanceCost(row) {
+      if (!row) return;
+
+      const advancesInput = row.querySelector('[data-field$="_adv"]');
+      const checkbox = row.querySelector(".career-skill-checkbox");
+      const costCell = row.querySelector(".advance-cost-value");
+
+      if (!advancesInput || !checkbox || !costCell) return;
+
+      const advances = Number(advancesInput.value) || 0;
+      const isCareerSkill = checkbox.checked;
+
+      costCell.textContent = getAdvanceCost(advances, isCareerSkill);
+    }
+
     function addSkillRow(tableName, skill, index, isCustom = false) {
       const tbody = document.querySelector(`[data-table="${tableName}"] tbody`);
       const tr = document.createElement("tr");
@@ -1882,11 +1932,20 @@
       careerCheckbox.checked = !!skill.career;
       careerCheckbox.addEventListener("change", () => {
         tr.classList.toggle("career-skill-row", careerCheckbox.checked);
+        updateSkillAdvanceCost(tr);
         scheduleAutoSave();
       });
       careerTd.appendChild(careerCheckbox);
       tr.appendChild(careerTd);
       tr.classList.toggle("career-skill-row", careerCheckbox.checked);
+
+      const xpTd = document.createElement("td");
+      xpTd.className = "career-skill-cell";
+      const xpSpan = document.createElement("span");
+      xpSpan.className = "advance-cost-value";
+      xpTd.appendChild(xpSpan);
+      tr.appendChild(xpTd);
+
 
       const actionTd = document.createElement("td");
       if (isCustom) {
@@ -1902,6 +1961,15 @@
         actionTd.style.color = "var(--muted)";
       }
       tr.appendChild(actionTd);
+
+      const advancesInput = tr.querySelector('[data-field$="_adv"]');
+      if (advancesInput) {
+        advancesInput.addEventListener("input", () => {
+          updateSkillAdvanceCost(tr);
+        });
+      }
+
+      updateSkillAdvanceCost(tr);
 
       tbody.appendChild(tr);
     }
@@ -2168,6 +2236,13 @@
       });
     }
 
+
+    function updateAllSkillAdvanceCosts() {
+      document.querySelectorAll('.skills-table tbody tr').forEach(row => {
+        updateSkillAdvanceCost(row);
+      });
+    }
+
     function refreshCareerSkillHighlights() {
       document.querySelectorAll(".career-skill-checkbox").forEach(checkbox => {
         const row = checkbox.closest("tr");
@@ -2195,6 +2270,7 @@
       });
       refreshCareerSkillHighlights();
       applyCareerSkillStatesFromData(data);
+      updateAllSkillAdvanceCosts();
       applyCharacterPortrait(data.photoUrl || "");
       updateCalculatedFields();
       autoResizeNotes();
