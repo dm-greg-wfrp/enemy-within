@@ -176,6 +176,46 @@
     .weapons-table col.weapon-flaws { width: 18.5%; }
     .weapons-table select { min-width: 145px; }
 
+
+    .portrait-box {
+      margin-top: 12px;
+      border: 1px dashed var(--line);
+      background: rgba(255,255,255,.35);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+    .portrait-frame {
+      width: 100%;
+      min-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--field);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .portrait-frame img {
+      width: 100%;
+      max-height: 360px;
+      object-fit: contain;
+      display: none;
+    }
+    .portrait-placeholder {
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      font-size: .95rem;
+      padding: 20px;
+    }
+    .portrait-controls {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .record-table { table-layout: fixed; margin-bottom: 10px; }
     .record-table th.section-title { background: #b9b1a5; color: #000; text-align: center; font-size: .9rem; letter-spacing: .03em; }
     .record-table input { width: 100%; border: 0; border-radius: 0; background: transparent; padding: 3px 4px; min-height: 24px; }
@@ -322,6 +362,7 @@
 </div>
     
     <div class="sheet" id="sheet">
+      <input type="hidden" data-field="photoUrl">
       <div class="grid two">
         <section>
           <h2>Character Details</h2>
@@ -367,6 +408,19 @@
               <label>Brass Pennies<input type="number" data-field="pennies" value="0"></label>
             </div>
           </div>
+          <div class="portrait-box">
+            <div class="portrait-frame">
+              <img id="portraitPreview" alt="Character portrait">
+              <div id="portraitPlaceholder" class="portrait-placeholder">No character portrait uploaded.</div>
+            </div>
+            <div class="portrait-controls">
+              <label class="file-label">Upload Character Photo
+                <input type="file" id="portraitUpload" accept="image/*" onchange="uploadCharacterPortrait(event)">
+              </label>
+              <button type="button" onclick="removeCharacterPortrait()">Remove Photo</button>
+            </div>
+          </div>
+
           <p class="small-note">Exchange: 1 Gold Crown = 20 Shillings = 240 Brass Pennies.</p>
         </section>
 
@@ -689,6 +743,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAIZ1hiLFV60z4feJv0wC48dTrvApjuqjQ",
@@ -701,6 +756,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const storage = firebase.storage();
 
     function getCharacterId() {
       const params = new URLSearchParams(window.location.search);
@@ -1952,6 +2008,70 @@
       makeAdvancedSkillRows();
     }
 
+
+    async function uploadCharacterPortrait(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      try {
+        setStatus("Uploading portrait...", "saving", false);
+
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const portraitRef = storage.ref(`characterImages/${CHARACTER_ID}/${Date.now()}_${safeName}`);
+
+        await portraitRef.put(file);
+        const photoUrl = await portraitRef.getDownloadURL();
+
+        const photoField = document.querySelector('[data-field="photoUrl"]');
+        if (photoField) photoField.value = photoUrl;
+
+        applyCharacterPortrait(photoUrl);
+        await saveSheet();
+
+        setStatus("Portrait uploaded and saved ✓", "saved-ok", false);
+      } catch (err) {
+        console.error(err);
+        setStatus("Portrait upload failed.", "unsaved", false);
+        alert("Portrait upload failed. Check Firebase Storage rules.");
+      } finally {
+        event.target.value = "";
+      }
+    }
+
+    function applyCharacterPortrait(photoUrl) {
+      const preview = document.getElementById("portraitPreview");
+      const placeholder = document.getElementById("portraitPlaceholder");
+
+      if (photoUrl) {
+        if (preview) {
+          preview.src = photoUrl;
+          preview.style.display = "block";
+        }
+        if (placeholder) placeholder.style.display = "none";
+      } else {
+        if (preview) {
+          preview.removeAttribute("src");
+          preview.style.display = "none";
+        }
+        if (placeholder) placeholder.style.display = "block";
+      }
+    }
+
+    async function removeCharacterPortrait() {
+      if (!confirm("Remove this character photo from the sheet?")) return;
+
+      const photoField = document.querySelector('[data-field="photoUrl"]');
+      if (photoField) photoField.value = "";
+
+      applyCharacterPortrait("");
+      await saveSheet();
+      setStatus("Portrait removed ✓", "saved-ok", false);
+    }
+
+    window.uploadCharacterPortrait = uploadCharacterPortrait;
+    window.removeCharacterPortrait = removeCharacterPortrait;
+
+
     function collectSheet() {
       const data = {};
       document.querySelectorAll("[data-field]").forEach(el => data[el.dataset.field] = el.value);
@@ -1969,6 +2089,7 @@
       document.querySelectorAll("[data-field]").forEach(el => {
         if (Object.prototype.hasOwnProperty.call(data, el.dataset.field)) el.value = data[el.dataset.field];
       });
+      applyCharacterPortrait(data.photoUrl || "");
       updateCalculatedFields();
       autoResizeNotes();
       updateLastEdited(data._updatedAt);
