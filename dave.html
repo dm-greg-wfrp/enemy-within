@@ -158,13 +158,13 @@
     .skills-table col.skill-career { width: 10%; }
     .skills-table tr.career-skill-row td,
     .skills-table tr.career-skill-row th {
-      background: #469385 !important;
+      background: #1c7867 !important;
     }
 
     .skills-table tr.career-skill-row input,
     .skills-table tr.career-skill-row td,
     .skills-table tr.career-skill-row th {
-      color: #469385 !important;
+      color: #5a2606 !important;
       font-weight: 600;
     }
     .career-skill-checkbox {
@@ -1874,7 +1874,7 @@
       const careerCheckbox = document.createElement("input");
       careerCheckbox.type = "checkbox";
       careerCheckbox.className = "career-skill-checkbox";
-      careerCheckbox.dataset.field = `${prefix}_career`;
+      careerCheckbox.dataset.careerKey = skillCareerKey(tableName, skill.name, skill.characteristic, skill.notes || "");
       careerCheckbox.checked = !!skill.career;
       careerCheckbox.addEventListener("change", () => {
         tr.classList.toggle("career-skill-row", careerCheckbox.checked);
@@ -2104,7 +2104,7 @@
       if (photoField) photoField.value = "";
 
       document.querySelectorAll(".career-skill-checkbox").forEach(cb => cb.checked = false);
-      applyCareerSkillStates(data);
+      applyCareerSkillStatesFromData(data);
       refreshCareerSkillHighlights();
       applyCharacterPortrait("");
       await saveSheet();
@@ -2126,6 +2126,30 @@
       });
     }
 
+
+    function skillCareerKey(tableName, skillName, characteristic, notes = "") {
+      return `${tableName}::${String(skillName || "").trim()}::${String(characteristic || "").trim()}::${String(notes || "").trim()}`;
+    }
+
+    function collectCareerSkillStates() {
+      const states = {};
+      document.querySelectorAll(".career-skill-checkbox").forEach(checkbox => {
+        const key = checkbox.dataset.careerKey;
+        if (key) states[key] = checkbox.checked;
+      });
+      return states;
+    }
+
+    function applyCareerSkillStatesFromData(data = {}) {
+      const states = data.careerSkills || {};
+      document.querySelectorAll(".career-skill-checkbox").forEach(checkbox => {
+        const key = checkbox.dataset.careerKey;
+        checkbox.checked = !!states[key];
+        const row = checkbox.closest("tr");
+        if (row) row.classList.toggle("career-skill-row", checkbox.checked);
+      });
+    }
+
     function refreshCareerSkillHighlights() {
       document.querySelectorAll(".career-skill-checkbox").forEach(checkbox => {
         const row = checkbox.closest("tr");
@@ -2139,6 +2163,7 @@
       data._customBasicSkills = getCustomSkillRows("basicSkills");
       data._advancedSkills = getCustomSkillRows("advancedSkills");
       data._selectedWeapons = selectedWeaponNames();
+      data.careerSkills = collectCareerSkillStates();
       return data;
     }
 
