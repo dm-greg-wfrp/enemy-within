@@ -167,6 +167,11 @@
       color: #5a2606 !important;
       font-weight: 600;
     }
+
+    .skills-table tr.career-skill-row .career-skill-checkbox {
+      outline: 2px solid #5a2606;
+      background: var(--field);
+    }
     .career-skill-checkbox {
       width: auto;
       transform: scale(1.25);
@@ -1874,7 +1879,6 @@
       const careerCheckbox = document.createElement("input");
       careerCheckbox.type = "checkbox";
       careerCheckbox.className = "career-skill-checkbox";
-      careerCheckbox.dataset.careerKey = skillCareerKey(tableName, skill.name, skill.characteristic, skill.notes || "");
       careerCheckbox.checked = !!skill.career;
       careerCheckbox.addEventListener("change", () => {
         tr.classList.toggle("career-skill-row", careerCheckbox.checked);
@@ -2104,7 +2108,6 @@
       if (photoField) photoField.value = "";
 
       document.querySelectorAll(".career-skill-checkbox").forEach(cb => cb.checked = false);
-      applyCareerSkillStatesFromData(data);
       refreshCareerSkillHighlights();
       applyCharacterPortrait("");
       await saveSheet();
@@ -2127,14 +2130,29 @@
     }
 
 
-    function skillCareerKey(tableName, skillName, characteristic, notes = "") {
-      return `${tableName}::${String(skillName || "").trim()}::${String(characteristic || "").trim()}::${String(notes || "").trim()}`;
+    function normalizeSkillKeyPart(value) {
+      return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+    }
+
+    function getSkillRowCareerKey(row) {
+      if (!row) return "";
+      const tableName = row.dataset.tableName || row.closest("table")?.dataset.table || "";
+      const name = row.querySelector('[data-field$="_name"]')?.value || "";
+      const characteristic = row.querySelector('[data-field$="_char"]')?.value || "";
+      const notes = row.querySelector('[data-field$="_notes"]')?.value || "";
+      return [
+        normalizeSkillKeyPart(tableName),
+        normalizeSkillKeyPart(name),
+        normalizeSkillKeyPart(characteristic),
+        normalizeSkillKeyPart(notes)
+      ].join("::");
     }
 
     function collectCareerSkillStates() {
       const states = {};
       document.querySelectorAll(".career-skill-checkbox").forEach(checkbox => {
-        const key = checkbox.dataset.careerKey;
+        const row = checkbox.closest("tr");
+        const key = getSkillRowCareerKey(row);
         if (key) states[key] = checkbox.checked;
       });
       return states;
@@ -2143,9 +2161,9 @@
     function applyCareerSkillStatesFromData(data = {}) {
       const states = data.careerSkills || {};
       document.querySelectorAll(".career-skill-checkbox").forEach(checkbox => {
-        const key = checkbox.dataset.careerKey;
-        checkbox.checked = !!states[key];
         const row = checkbox.closest("tr");
+        const key = getSkillRowCareerKey(row);
+        checkbox.checked = !!states[key];
         if (row) row.classList.toggle("career-skill-row", checkbox.checked);
       });
     }
@@ -2176,6 +2194,7 @@
         if (Object.prototype.hasOwnProperty.call(data, el.dataset.field)) el.value = data[el.dataset.field];
       });
       refreshCareerSkillHighlights();
+      applyCareerSkillStatesFromData(data);
       applyCharacterPortrait(data.photoUrl || "");
       updateCalculatedFields();
       autoResizeNotes();
