@@ -154,6 +154,26 @@
     .skills-table col.skill-adv { width: 14%; }
     .skills-table col.skill-total { width: 14%; }
     .skills-table col.skill-notes { width: 14%; }
+
+    .skills-table col.skill-career { width: 10%; }
+    .skills-table tr.career-skill-row td {
+      background: #1c7867 !important;
+      color: #fff;
+    }
+    .skills-table tr.career-skill-row input {
+      color: #fff;
+      font-weight: bold;
+    }
+    .career-skill-checkbox {
+      width: auto;
+      transform: scale(1.25);
+      cursor: pointer;
+      accent-color: #1c7867;
+    }
+    .career-skill-cell {
+      text-align: center;
+      vertical-align: middle;
+    }
     .skills-table col.skill-action { width: 8%; }
     .delete-skill-button {
       background: #7b2e1f;
@@ -322,7 +342,7 @@
   }
 
   .skills-table {
-    min-width: 850px;
+    min-width: 950px;
   }
 
   .weapons-table {
@@ -523,13 +543,14 @@
               <col class="skill-adv">
               <col class="skill-total">
               <col class="skill-notes">
+              <col class="skill-career">
               <col class="skill-action">
             </colgroup>
-            <thead><tr><th>Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th><th>Delete</th></tr></thead>
+            <thead><tr><th>Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th><th>Career Skill?</th><th>Delete</th></tr></thead>
             <tbody></tbody>
             <tfoot>
               <tr>
-                <td colspan="7">
+                <td colspan="8">
                   <div class="add-row-controls">
                     <label>Add Basic Grouped Skill
                       <select id="addBasicGroupedSkill" onchange="addSkillFromSelect('basicSkills', this)">
@@ -555,13 +576,14 @@
               <col class="skill-adv">
               <col class="skill-total">
               <col class="skill-notes">
+              <col class="skill-career">
               <col class="skill-action">
             </colgroup>
-            <thead><tr><th>Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th><th>Delete</th></tr></thead>
+            <thead><tr><th>Skill</th><th>Characteristic</th><th>Current Score</th><th>Advances</th><th>Total</th><th>Notes / Specialisation</th><th>Career Skill?</th><th>Delete</th></tr></thead>
             <tbody></tbody>
             <tfoot>
               <tr>
-                <td colspan="7">
+                <td colspan="8">
                   <div class="add-row-controls">
                     <label>Add Advanced Skill
                       <select id="addAdvancedSkill" onchange="addSkillFromSelect('advancedSkills', this)">
@@ -1844,6 +1866,21 @@
         tr.appendChild(td);
       });
 
+      const careerTd = document.createElement("td");
+      careerTd.className = "career-skill-cell";
+      const careerCheckbox = document.createElement("input");
+      careerCheckbox.type = "checkbox";
+      careerCheckbox.className = "career-skill-checkbox";
+      careerCheckbox.dataset.field = `${prefix}_career`;
+      careerCheckbox.checked = !!skill.career;
+      careerCheckbox.addEventListener("change", () => {
+        tr.classList.toggle("career-skill-row", careerCheckbox.checked);
+        scheduleAutoSave();
+      });
+      careerTd.appendChild(careerCheckbox);
+      tr.appendChild(careerTd);
+      tr.classList.toggle("career-skill-row", careerCheckbox.checked);
+
       const actionTd = document.createElement("td");
       if (isCustom) {
         const deleteButton = document.createElement("button");
@@ -2063,6 +2100,8 @@
       const photoField = document.querySelector('[data-field="photoUrl"]');
       if (photoField) photoField.value = "";
 
+      document.querySelectorAll(".career-skill-checkbox").forEach(cb => cb.checked = false);
+      refreshCareerSkillHighlights();
       applyCharacterPortrait("");
       await saveSheet();
       setStatus("Portrait removed ✓", "saved-ok", false);
@@ -2071,6 +2110,14 @@
     window.uploadCharacterPortrait = uploadCharacterPortrait;
     window.removeCharacterPortrait = removeCharacterPortrait;
 
+
+
+    function refreshCareerSkillHighlights() {
+      document.querySelectorAll(".career-skill-checkbox").forEach(checkbox => {
+        const row = checkbox.closest("tr");
+        if (row) row.classList.toggle("career-skill-row", checkbox.checked);
+      });
+    }
 
     function collectSheet() {
       const data = {};
@@ -2089,6 +2136,7 @@
       document.querySelectorAll("[data-field]").forEach(el => {
         if (Object.prototype.hasOwnProperty.call(data, el.dataset.field)) el.value = data[el.dataset.field];
       });
+      refreshCareerSkillHighlights();
       applyCharacterPortrait(data.photoUrl || "");
       updateCalculatedFields();
       autoResizeNotes();
