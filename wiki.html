@@ -468,7 +468,7 @@ label{ font-weight:bold; }
 
 .dashboard-category-grid {
     display:grid;
-    grid-template-columns:repeat(6, minmax(135px, 1fr));
+    grid-template-columns:repeat(7, minmax(105px, 1fr));
     gap:10px;
 }
 
@@ -476,8 +476,8 @@ label{ font-weight:bold; }
     background:#1a1f2a;
     border:1px solid #313b4d;
     border-radius:7px;
-    padding:14px 12px;
-    min-height:86px;
+    padding:12px 10px;
+    min-height:78px;
     cursor:pointer;
     transition:transform .15s ease, border-color .15s ease, background .15s ease;
 }
@@ -518,14 +518,14 @@ label{ font-weight:bold; }
 .dashboard-card-count {
     color:#f4f8ff;
     font-weight:bold;
-    font-size:18px;
+    font-size:16px;
 }
 
 .dashboard-card-title {
     color:#ffffff;
     font-weight:bold;
-    font-size:14px;
-    margin-bottom:4px;
+    font-size:13px;
+    margin-bottom:3px;
 }
 
 .dashboard-card-subtitle {
@@ -1671,7 +1671,7 @@ function renderDashboard(){
         {name:"NPCs", icon:"☷", cls:"npcs", subtitle:"People in the world"},
         {name:"Enemies", icon:"☠", cls:"enemies", subtitle:"Threats & monsters"},
         {name:"Locations", icon:"⌖", cls:"locations", subtitle:"Places & sites"},
-        {name:"Lore", icon:"☰", cls:"lore", subtitle:"World lore & history"},
+        {name:"Lore", icon:"☰", cls:"lore", subtitle:"World knowledge & history"},
         {name:"Handouts", icon:"◈", cls:"handouts", subtitle:"Clues & images"},
         {name:"Session Notes", icon:"✎", cls:"sessions", subtitle:"Campaign records"}
     ];
