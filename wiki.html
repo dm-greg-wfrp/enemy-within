@@ -511,6 +511,7 @@ label{ font-weight:bold; }
 .dashboard-icon.npcs { background:#18553e; }
 .dashboard-icon.enemies { background:#673030; }
 .dashboard-icon.locations { background:#735022; }
+.dashboard-icon.lore { background:#5a3c7a; }
 .dashboard-icon.handouts { background:#214d6e; }
 .dashboard-icon.sessions { background:#402070; }
 
@@ -1054,6 +1055,7 @@ button.danger:hover {
         <div class="filter-bar">
             <button id="filterAll" onclick="setFilter('All')">All</button>
             <button id="filterLocations" onclick="showTypeList('Locations')">Locations</button>
+            <button id="filterLore" onclick="showTypeList('Lore')">Lore</button>
             <button id="filterNPCs" onclick="showTypeList('NPCs')">NPCs</button>
             <button id="filterCharacters" onclick="showTypeList('Characters')">Characters</button>
             <button id="filterEnemies" onclick="showTypeList('Enemies')">Enemies</button>
@@ -1075,7 +1077,7 @@ button.danger:hover {
             </div>
             
             <div class="dashboard-section-title">
-                By Type <span class="dashboard-count">6 Types</span>
+                By Type <span class="dashboard-count">7 Types</span>
             </div>
             <div id="dashboardCategories" class="dashboard-category-grid"></div>
 
@@ -1162,6 +1164,7 @@ button.danger:hover {
                         <option>Characters</option>
                         <option>Enemies</option>
                         <option>Locations</option>
+                        <option>Lore</option>
                         <option>Handouts</option>
                         <option>Session Notes</option>
                     </select>
@@ -1407,7 +1410,7 @@ function generateBacklinks(targetTitle, currentId){
 
 
 function setActiveFilterButton(){
-    ["All","Locations","NPCs","Characters","Enemies","Handouts","Session Notes"].forEach(cat => {
+    ["All","Locations","Lore","NPCs","Characters","Enemies","Handouts","Session Notes"].forEach(cat => {
         const id = "filter" + cat.replaceAll(" ","");
         const btn = document.getElementById(id);
         if(btn) btn.classList.toggle("active", cat === currentFilter);
@@ -1668,6 +1671,7 @@ function renderDashboard(){
         {name:"NPCs", icon:"☷", cls:"npcs", subtitle:"People in the world"},
         {name:"Enemies", icon:"☠", cls:"enemies", subtitle:"Threats & monsters"},
         {name:"Locations", icon:"⌖", cls:"locations", subtitle:"Places & sites"},
+        {name:"Lore", icon:"☰", cls:"lore", subtitle:"World lore & history"},
         {name:"Handouts", icon:"◈", cls:"handouts", subtitle:"Clues & images"},
         {name:"Session Notes", icon:"✎", cls:"sessions", subtitle:"Campaign records"}
     ];
@@ -1697,11 +1701,13 @@ function renderDashboard(){
                           category === "NPCs" ? "npcs" :
                           category === "Enemies" ? "enemies" :
                           category === "Locations" ? "locations" :
+                          category === "Lore" ? "lore" :
                           category === "Handouts" ? "handouts" : "sessions";
         const icon = category === "Characters" ? "⚔" :
                      category === "NPCs" ? "☷" :
                      category === "Enemies" ? "☠" :
                      category === "Locations" ? "⌖" :
+                     category === "Lore" ? "☰" :
                      category === "Handouts" ? "◈" : "✎";
         const updated = getEntryUpdatedDate(entry);
 
@@ -1814,7 +1820,7 @@ let filtered = entries.slice();
         grouped[cat].push(entry);
     }
 
-    const order = ["Locations","NPCs","Characters","Enemies","Handouts","Session Notes","Other"];
+    const order = ["Locations","Lore","NPCs","Characters","Enemies","Handouts","Session Notes","Other"];
     els.sidebarEntries.innerHTML = "";
     let renderedAny = false;
 
