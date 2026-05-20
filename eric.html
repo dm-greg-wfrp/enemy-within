@@ -46,7 +46,7 @@
       margin: 22px auto;
       padding: 0 16px 40px;
     }
-    .buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    .buttons { display: flex; gap: 6px; flex-wrap: wrap; }
     button, .file-label {
       border: 1px solid rgba(255,255,255,.35);
       background: var(--accent);
@@ -245,6 +245,62 @@
       flex-wrap: wrap;
     }
 
+
+    .tier-key {
+      grid-column: 1 / -1;
+      margin: 8px 0 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.28);
+      border-radius: 10px;
+      padding: 4px 6px;
+    }
+    .tier-key-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(68px, 1fr));
+      gap: 8px;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      font-size: 0.78rem;
+      text-align: center;
+      max-width: 470px;
+    }
+    .tier-key-item {
+      border: 1px solid var(--line);
+      color: #000;
+      padding: 6px 8px;
+      border-radius: 4px;
+    }
+    .tier-t1 { background: #bfe3ef !important; }
+    .tier-t2 { background: #e8844a !important; }
+    .tier-t3 { background: #a6a6a6 !important; }
+    .tier-t4 { background: #ffc000 !important; }
+
+    .characteristics-table td.characteristic-tier-cell {
+      position: relative;
+      padding-right: 40px;
+    }
+    .characteristics-table td.characteristic-tier-cell input {
+      padding-right: 4px;
+    }
+    .char-tier-select {
+      position: absolute;
+      right: 3px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 34px;
+      min-width: 34px;
+      height: 24px;
+      padding: 1px;
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: rgba(255,255,255,.75);
+      color: #000;
+      font-size: 11px;
+      font-family: Arial, sans-serif;
+      cursor: pointer;
+    }
+
     .record-table { table-layout: fixed; margin-bottom: 10px; }
     .record-table th.section-title { background: #b9b1a5; color: #000; text-align: center; font-size: .9rem; letter-spacing: .03em; }
     .record-table input { width: 100%; border: 0; border-radius: 0; background: transparent; padding: 3px 4px; min-height: 24px; }
@@ -347,7 +403,7 @@
   }
 
   .characteristics-table {
-    min-width: 820px;
+    min-width: 900px;
   }
 
   .skills-table {
@@ -491,6 +547,15 @@
 
         <section class="full">
           <h2>Characteristics</h2>
+
+          <div class="tier-key">
+            <div class="tier-key-grid">
+              <div class="tier-key-item tier-t1">Tier 1</div>
+              <div class="tier-key-item tier-t2">Tier 2</div>
+              <div class="tier-key-item tier-t3">Tier 3</div>
+              <div class="tier-key-item tier-t4">Tier 4</div>
+            </div>
+          </div>
           <div class="table-wrap">
 <table class="characteristics-table">
             <thead>
@@ -499,16 +564,16 @@
             <tbody>
               <tr>
                 <th>Starting</th>
-                <td><input type="number" data-field="charWS" value="45"></td>
-                <td><input type="number" data-field="charBS" value="30"></td>
-                <td><input type="number" data-field="charS" value="45"></td>
-                <td><input type="number" data-field="charT" value="45"></td>
-                <td><input type="number" data-field="charI" value="30"></td>
-                <td><input type="number" data-field="charAgi" value="45"></td>
-                <td><input type="number" data-field="charDex" value="30"></td>
-                <td><input type="number" data-field="charInt" value="50"></td>
-                <td><input type="number" data-field="charWP" value="30"></td>
-                <td><input type="number" data-field="charFel" value="50"></td>
+                <td class="characteristic-tier-cell"><input type="number" data-field="charWS" value="45"><select class="char-tier-select" data-field="tierWS" onchange="updateCharacteristicTierCell(this)"><option value=""></option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option></select></td>
+                <td class="characteristic-tier-cell"><input type="number" data-field="charBS" value="30"><select class="char-tier-select" data-field="tierBS" onchange="updateCharacteristicTierCell(this)"><option value=""></option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option></select></td>
+                <td class="characteristic-tier-cell"><input type="number" data-field="charS" value="45"><select class="char-tier-select" data-field="tierS" onchange="updateCharacteristicTierCell(this)"><option value=""></option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option></select></td>
+                <td class="characteristic-tier-cell"><input type="number" data-field="charT" value="45"><select class="char-tier-select" data-field="tierT" onchange="updateCharacteristicTierCell(this)"><option value=""></option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option></select></td>
+                <td class="characteristic-tier-cell"><input type="number" data-field="charI" value="30"><select class="char-tier-select" data-field="tierI" onchange="updateCharacteristicTierCell(this)"><option value=""></option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option></select></td>
+                <td class="characteristic-tier-cell"><input type="number" data-field="charAgi" value="45"><select class="char-tier-select" data-field="tierAgi" onchange="updateCharacteristicTierCell(this)"><option value=""></option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option></select></td>
+                <td class="characteristic-tier-cell"><input type="number" data-field="charDex" value="30"><select class="char-tier-select" data-field="tierDex" onchange="updateCharacteristicTierCell(this)"><option value=""></option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option></select></td>
+                <td class="characteristic-tier-cell"><input type="number" data-field="charInt" value="50"><select class="char-tier-select" data-field="tierInt" onchange="updateCharacteristicTierCell(this)"><option value=""></option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option></select></td>
+                <td class="characteristic-tier-cell"><input type="number" data-field="charWP" value="30"><select class="char-tier-select" data-field="tierWP" onchange="updateCharacteristicTierCell(this)"><option value=""></option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option></select></td>
+                <td class="characteristic-tier-cell"><input type="number" data-field="charFel" value="50"><select class="char-tier-select" data-field="tierFel" onchange="updateCharacteristicTierCell(this)"><option value=""></option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option></select></td>
               </tr>
               <tr>
                 <th>Advances</th>
@@ -2001,6 +2066,7 @@
 
       row.remove();
       reindexCustomSkillRows(row.dataset.tableName);
+      refreshCharacteristicTierCells();
       updateCalculatedFields();
       setStatus(`Deleted ${label}.`, "unsaved", false);
       scheduleAutoSave();
@@ -2264,6 +2330,38 @@
         if (row) row.classList.toggle("career-skill-row", checkbox.checked);
       });
     }
+
+
+    function updateCharacteristicTierCell(select) {
+      const cell = select.closest("td");
+      if (!cell) return;
+
+      cell.classList.remove("tier-t1", "tier-t2", "tier-t3", "tier-t4");
+
+      if (select.value === "T1") cell.classList.add("tier-t1");
+      if (select.value === "T2") cell.classList.add("tier-t2");
+      if (select.value === "T3") cell.classList.add("tier-t3");
+      if (select.value === "T4") cell.classList.add("tier-t4");
+
+      scheduleAutoSave();
+    }
+
+    function refreshCharacteristicTierCells() {
+      document.querySelectorAll(".char-tier-select").forEach(select => {
+        const cell = select.closest("td");
+        if (!cell) return;
+
+        cell.classList.remove("tier-t1", "tier-t2", "tier-t3", "tier-t4");
+
+        if (select.value === "T1") cell.classList.add("tier-t1");
+        if (select.value === "T2") cell.classList.add("tier-t2");
+        if (select.value === "T3") cell.classList.add("tier-t3");
+        if (select.value === "T4") cell.classList.add("tier-t4");
+      });
+    }
+
+    window.updateCharacteristicTierCell = updateCharacteristicTierCell;
+
 
     function collectSheet() {
       const data = {};
