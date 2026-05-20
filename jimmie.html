@@ -275,6 +275,23 @@
     .tier-t3 { background: #a6a6a6 !important; }
     .tier-t4 { background: #ffc000 !important; }
 
+    .characteristics-table td.characteristic-tier-cell.tier-t1,
+    .characteristics-table td.characteristic-tier-cell.tier-t1 input {
+      background: #bfe3ef !important;
+    }
+    .characteristics-table td.characteristic-tier-cell.tier-t2,
+    .characteristics-table td.characteristic-tier-cell.tier-t2 input {
+      background: #e8844a !important;
+    }
+    .characteristics-table td.characteristic-tier-cell.tier-t3,
+    .characteristics-table td.characteristic-tier-cell.tier-t3 input {
+      background: #a6a6a6 !important;
+    }
+    .characteristics-table td.characteristic-tier-cell.tier-t4,
+    .characteristics-table td.characteristic-tier-cell.tier-t4 input {
+      background: #ffc000 !important;
+    }
+
     .characteristics-table td.characteristic-tier-cell {
       position: relative;
       padding-right: 40px;
@@ -2066,8 +2083,8 @@
 
       row.remove();
       reindexCustomSkillRows(row.dataset.tableName);
-      applyCharacteristicTiers(data);
       updateCalculatedFields();
+      applyCharacteristicTiers(data);
       setStatus(`Deleted ${label}.`, "unsaved", false);
       scheduleAutoSave();
     }
@@ -2332,31 +2349,43 @@
     }
 
 
-    function updateCharacteristicTierCell(select) {
+    function getTierColor(value) {
+      if (value === "T1") return "#bfe3ef";
+      if (value === "T2") return "#e8844a";
+      if (value === "T3") return "#a6a6a6";
+      if (value === "T4") return "#ffc000";
+      return "";
+    }
+
+    function applyTierColorToCell(select) {
       const cell = select.closest("td");
       if (!cell) return;
 
       cell.classList.remove("tier-t1", "tier-t2", "tier-t3", "tier-t4");
+
+      const color = getTierColor(select.value);
 
       if (select.value === "T1") cell.classList.add("tier-t1");
       if (select.value === "T2") cell.classList.add("tier-t2");
       if (select.value === "T3") cell.classList.add("tier-t3");
       if (select.value === "T4") cell.classList.add("tier-t4");
 
+      cell.style.backgroundColor = color || "";
+
+      const input = cell.querySelector("input");
+      if (input) {
+        input.style.backgroundColor = color || "";
+      }
+    }
+
+    function updateCharacteristicTierCell(select) {
+      applyTierColorToCell(select);
       if (typeof scheduleAutoSave === "function") scheduleAutoSave();
     }
 
     function refreshCharacteristicTierCells() {
       document.querySelectorAll(".char-tier-select").forEach(select => {
-        const cell = select.closest("td");
-        if (!cell) return;
-
-        cell.classList.remove("tier-t1", "tier-t2", "tier-t3", "tier-t4");
-
-        if (select.value === "T1") cell.classList.add("tier-t1");
-        if (select.value === "T2") cell.classList.add("tier-t2");
-        if (select.value === "T3") cell.classList.add("tier-t3");
-        if (select.value === "T4") cell.classList.add("tier-t4");
+        applyTierColorToCell(select);
       });
     }
 
@@ -2379,13 +2408,19 @@
       document.querySelectorAll(".char-tier-select").forEach(select => {
         const field = select.dataset.field;
         if (!field) return;
+
         if (tiers[field] !== undefined) {
           select.value = tiers[field] || "";
         } else if (data[field] !== undefined) {
           select.value = data[field] || "";
         }
+
+        applyTierColorToCell(select);
       });
-      refreshCharacteristicTierCells();
+    }
+
+        applyTierColorToCell(select);
+      });
     }
 
 
@@ -2515,6 +2550,7 @@
           const data = doc.data();
 
           applySheet(data);
+          setTimeout(() => applyCharacteristicTiers(data), 0);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
           setStatus("Loaded online sheet.", "saved-ok");
 
@@ -2537,7 +2573,9 @@
         return;
       }
 
-      applySheet(JSON.parse(saved));
+      const backupData = JSON.parse(saved);
+      applySheet(backupData);
+      setTimeout(() => applyCharacteristicTiers(backupData), 0);
       setStatus("Loaded browser backup.", "saved-ok");
 
       showSheetAfterLoad();
