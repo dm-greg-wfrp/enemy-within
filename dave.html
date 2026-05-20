@@ -2084,7 +2084,7 @@
       row.remove();
       reindexCustomSkillRows(row.dataset.tableName);
       updateCalculatedFields();
-      applyCharacteristicTiers(data);
+      refreshCharacteristicTierCells();
       setStatus(`Deleted ${label}.`, "unsaved", false);
       scheduleAutoSave();
     }
@@ -2348,7 +2348,6 @@
       });
     }
 
-
     function getTierColor(value) {
       if (value === "T1") return "#bfe3ef";
       if (value === "T2") return "#e8844a";
@@ -2358,6 +2357,7 @@
     }
 
     function applyTierColorToCell(select) {
+      if (!select) return;
       const cell = select.closest("td");
       if (!cell) return;
 
@@ -2370,17 +2370,9 @@
       if (select.value === "T3") cell.classList.add("tier-t3");
       if (select.value === "T4") cell.classList.add("tier-t4");
 
-      cell.style.backgroundColor = color || "";
-
+      cell.style.backgroundColor = color;
       const input = cell.querySelector("input");
-      if (input) {
-        input.style.backgroundColor = color || "";
-      }
-    }
-
-    function updateCharacteristicTierCell(select) {
-      applyTierColorToCell(select);
-      if (typeof scheduleAutoSave === "function") scheduleAutoSave();
+      if (input) input.style.backgroundColor = color;
     }
 
     function refreshCharacteristicTierCells() {
@@ -2389,31 +2381,12 @@
       });
     }
 
-    window.updateCharacteristicTierCell = updateCharacteristicTierCell;
-
-
-
-    function collectCharacteristicTiers() {
-      const tiers = {};
-      document.querySelectorAll(".char-tier-select").forEach(select => {
-        if (select.dataset.field) {
-          tiers[select.dataset.field] = select.value || "";
-        }
-      });
-      return tiers;
+    function updateCharacteristicTierCell(select) {
+      applyTierColorToCell(select);
+      if (typeof scheduleAutoSave === "function") scheduleAutoSave();
     }
 
-    function applyCharacteristicTiers(data = {}) {
-      const tiers = data.characteristicTiers || {};
-      document.querySelectorAll(".char-tier-select").forEach(select => {
-        const field = select.dataset.field;
-        if (!field) return;
-
-        if (tiers[field] !== undefined) {
-          select.value = tiers[field] || "";
-        } else if (data[field] !== undefined) {
-          select.value = data[field] || "";
-        }
+    window.updateCharacteristicTierCell = updateCharacteristicTierCell;
 
         applyTierColorToCell(select);
       });
@@ -2431,7 +2404,6 @@
       data._advancedSkills = getCustomSkillRows("advancedSkills");
       data._selectedWeapons = selectedWeaponNames();
       data.careerSkills = collectCareerSkillStates();
-      data.characteristicTiers = collectCharacteristicTiers();
       return data;
     }
 
@@ -2540,6 +2512,15 @@
       if (sheet) sheet.style.display = "block";
     }
 
+
+    function showLoadedSheet() {
+      const loading = document.getElementById("loadingScreen");
+      const sheet = document.getElementById("sheet");
+      if (loading) loading.style.display = "none";
+      if (sheet) sheet.style.display = "block";
+      refreshCharacteristicTierCells();
+    }
+
     async function loadSheet() {
       isLoadingSheet = true;
 
@@ -2550,7 +2531,6 @@
           const data = doc.data();
 
           applySheet(data);
-          setTimeout(() => applyCharacteristicTiers(data), 0);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
           setStatus("Loaded online sheet.", "saved-ok");
 
@@ -2573,10 +2553,9 @@
         return;
       }
 
-      const backupData = JSON.parse(saved);
-      applySheet(backupData);
-      setTimeout(() => applyCharacteristicTiers(backupData), 0);
+      applySheet(JSON.parse(saved));
       setStatus("Loaded browser backup.", "saved-ok");
+      showLoadedSheet();
 
       showSheetAfterLoad();
     }
