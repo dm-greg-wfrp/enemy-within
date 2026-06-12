@@ -504,6 +504,15 @@
               <label>Resilience<input type="number" data-field="resilience" value="3"></label>
               <label>Resolve<input type="number" data-field="resolve" value="4"></label>
             </div>
+
+            <div class="grid two">
+              <label>Current Corruption Points
+                <input type="number" data-field="corruptionCurrent" value="0">
+              </label>
+              <label>Maximum Corruption Points
+                <input type="number" data-field="corruptionMax" readonly>
+              </label>
+            </div>
             <div class="grid three">
               <label>Gold Crowns<input type="number" data-field="gold" value="0"></label>
               <label>Shillings<input type="number" data-field="shillings" value="8"></label>
@@ -2496,12 +2505,27 @@
       if (totalEnc) totalEnc.value = characteristicBonus("S") + characteristicBonus("T") + strongBack;
     }
 
+
+    function updateCorruptionMax() {
+      const wp = Number(document.querySelector('[data-field="curWP"]')?.value || 0);
+      const t = Number(document.querySelector('[data-field="curT"]')?.value || 0);
+
+      const wpBonus = Math.floor(wp / 10);
+      const tBonus = Math.floor(t / 10);
+
+      const corruptionMaxField = document.querySelector('[data-field="corruptionMax"]');
+      if (corruptionMaxField) {
+        corruptionMaxField.value = wpBonus + tBonus;
+      }
+    }
+
     function updateCalculatedFields() {
       // existing calculations
       updateCharacteristics();
       updateMovementAndEncumbrance();
       updateSkills();
       updateWeapons();
+      updateCorruptionMax();
 
  // Total XP = Current XP + Spent XP
     const currentXP = Number(
