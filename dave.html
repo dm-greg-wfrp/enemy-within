@@ -2505,12 +2505,27 @@
       if (totalEnc) totalEnc.value = characteristicBonus("S") + characteristicBonus("T") + strongBack;
     }
 
+
+    function updateCorruptionMax() {
+      const wp = Number(document.querySelector('[data-field="curWP"]')?.value || 0);
+      const t = Number(document.querySelector('[data-field="curT"]')?.value || 0);
+
+      const wpBonus = Math.floor(wp / 10);
+      const tBonus = Math.floor(t / 10);
+
+      const corruptionMaxField = document.querySelector('[data-field="corruptionMax"]');
+      if (corruptionMaxField) {
+        corruptionMaxField.value = wpBonus + tBonus;
+      }
+    }
+
     function updateCalculatedFields() {
       // existing calculations
       updateCharacteristics();
       updateMovementAndEncumbrance();
       updateSkills();
       updateWeapons();
+      updateCorruptionMax();
 
  // Total XP = Current XP + Spent XP
     const currentXP = Number(
