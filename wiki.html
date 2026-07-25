@@ -1146,7 +1146,7 @@ button.danger:hover {
             <div class="panel-header">
                 <div>
                     <h2 id="editHeading">Create / Edit Entry</h2>
-                    <div class="small">Use <strong>[[Entry Name]]</strong> to link to another wiki entry.</div>
+                    <div class="small">Use <strong>[[Entry Name]]</strong> or <strong>[[Entry Name|Displayed Text]]</strong> to link to another wiki entry.</div>
                 </div>
                 <div class="meta">
                     <div><strong>Created:</strong> <span id="createdDisplay">—</span></div>
@@ -1442,9 +1442,21 @@ window.formatText = function(command, value = null){
 };
 
 window.insertWikiLink = function(){
-    const title = prompt("Enter the entry title to link:");
-    if(!title) return;
-    document.execCommand("insertText", false, `[[${title}]]`);
+    const targetTitle = prompt("Enter the exact title of the wiki entry to open:");
+    if(!targetTitle) return;
+
+    const displayText = prompt(
+        "Enter different text to display, or leave blank to display the entry title:",
+        ""
+    );
+
+    const cleanTarget = targetTitle.trim();
+    const cleanDisplay = String(displayText || "").trim();
+    const wikiMarkup = cleanDisplay && cleanDisplay !== cleanTarget
+        ? `[[${cleanTarget}|${cleanDisplay}]]`
+        : `[[${cleanTarget}]]`;
+
+    document.execCommand("insertText", false, wikiMarkup);
     els.editor.focus();
 };
 
@@ -1452,14 +1464,30 @@ function findEntryByTitle(title){
     return entries.find(e => normalizeTitle(e.title) === normalizeTitle(title));
 }
 
+function parseWikiLink(rawLink){
+    const parts = String(rawLink || "").split("|");
+    const targetTitle = (parts.shift() || "").trim();
+    const displayText = parts.length
+        ? parts.join("|").trim()
+        : targetTitle;
+
+    return {
+        targetTitle,
+        displayText: displayText || targetTitle
+    };
+}
+
 function renderWikiLinks(html){
-    return (html || "").replace(/\[\[(.*?)\]\]/g, (match, p1) => {
-        const parts = p1.split("|");
-        const target = (parts[0] || "").trim();
-        const label = (parts[1] || parts[0] || "").trim();
-        const found = findEntryByTitle(target);
+    return (html || "").replace(/\[\[(.*?)\]\]/g, (match, rawLink) => {
+        const { targetTitle, displayText } = parseWikiLink(rawLink);
+        if(!targetTitle) return match;
+
+        const found = findEntryByTitle(targetTitle);
+        const safeTarget = escapeHtml(targetTitle);
+        const safeDisplay = escapeHtml(displayText);
         const cls = found ? "wiki-link" : "wiki-link missing";
-        return `<span class="${cls}" data-wikilink="${escapeHtml(target)}">${escapeHtml(label)}</span>`;
+
+        return `<span class="${cls}" data-wikilink="${safeTarget}" title="${safeTarget}">${safeDisplay}</span>`;
     });
 }
 
@@ -1469,8 +1497,8 @@ function wireWikiLinks(container){
     });
 }
 
-window.openWikiLink = function(target){
-    const entry = findEntryByTitle(target);
+window.openWikiLink = function(title){
+    const entry = findEntryByTitle(title);
     if(entry){
         openEntryView(entry.id);
     } else {
@@ -1494,7 +1522,8 @@ function generateBacklinks(targetTitle, currentId){
         const content = entry.content || "";
         let match;
         while((match = regex.exec(content)) !== null){
-            if(normalizeTitle(match[1]) === target){
+            const { targetTitle } = parseWikiLink(match[1]);
+            if(normalizeTitle(targetTitle) === target){
                 backlinks.push(entry);
                 break;
             }
@@ -2093,14 +2122,14 @@ window.exportWikiData = async function() {
 <script>
 (function () {
     const CAMPAIGN_PASSWORD = "EnemyWithin";
-    const SESSION_KEY = "enemyWithinWikiUnlocked";
+    const ACCESS_KEY = "enemyWithinWikiUnlocked";
 
     window.checkCampaignPassword = function () {
         const input = document.getElementById("campaignPasswordInput");
         const error = document.getElementById("loginError");
 
         if (input && input.value === CAMPAIGN_PASSWORD) {
-            sessionStorage.setItem(SESSION_KEY, "true");
+            localStorage.setItem(ACCESS_KEY, "true");
             document.getElementById("loginOverlay").style.display = "none";
         } else if (error) {
             error.textContent = "Incorrect password.";
@@ -2111,7 +2140,7 @@ window.exportWikiData = async function() {
         const overlay = document.getElementById("loginOverlay");
         const input = document.getElementById("campaignPasswordInput");
 
-        if (sessionStorage.getItem(SESSION_KEY) === "true" && overlay) {
+        if (localStorage.getItem(ACCESS_KEY) === "true" && overlay) {
             overlay.style.display = "none";
         }
 
