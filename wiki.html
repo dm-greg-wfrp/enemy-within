@@ -2092,14 +2092,14 @@ window.exportWikiData = async function() {
 <script>
 (function () {
     const CAMPAIGN_PASSWORD = "EnemyWithin";
-    const SESSION_KEY = "enemyWithinWikiUnlocked";
+    const ACCESS_KEY = "enemyWithinWikiUnlocked";
 
     window.checkCampaignPassword = function () {
         const input = document.getElementById("campaignPasswordInput");
         const error = document.getElementById("loginError");
 
         if (input && input.value === CAMPAIGN_PASSWORD) {
-            sessionStorage.setItem(SESSION_KEY, "true");
+            localStorage.setItem(ACCESS_KEY, "true");
             document.getElementById("loginOverlay").style.display = "none";
         } else if (error) {
             error.textContent = "Incorrect password.";
@@ -2110,7 +2110,7 @@ window.exportWikiData = async function() {
         const overlay = document.getElementById("loginOverlay");
         const input = document.getElementById("campaignPasswordInput");
 
-        if (sessionStorage.getItem(SESSION_KEY) === "true" && overlay) {
+        if (localStorage.getItem(ACCESS_KEY) === "true" && overlay) {
             overlay.style.display = "none";
         }
 
