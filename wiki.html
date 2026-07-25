@@ -1128,6 +1128,7 @@ button.danger:hover {
             <div class="toolbar">
     <button onclick="returnHomeDashboard()">← Return Home</button>
     <button onclick="editCurrentEntry()">Edit Entry</button>
+    <button class="secondary" onclick="copyCurrentEntryLink()">Copy Link</button>
     <button class="secondary" onclick="newEntry()">+ New Entry</button>
     <button class="danger" onclick="deleteCurrentEntry()">Delete Entry</button>
 </div>
@@ -1310,6 +1311,99 @@ function normalizeTitle(title){
     return String(title || "").trim().toLowerCase();
 }
 
+function slugifyTitle(title){
+    return String(title || "")
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/&/g, " and ")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .replace(/-{2,}/g, "-") || "entry";
+}
+
+function getEntrySlug(entry){
+    return entry?.slug || slugifyTitle(entry?.title || "");
+}
+
+function findEntryBySlug(slug){
+    const normalized = String(slug || "").trim().toLowerCase();
+    return entries.find(entry => getEntrySlug(entry) === normalized);
+}
+
+function makeUniqueSlug(title, currentId = ""){
+    const base = slugifyTitle(title);
+    let candidate = base;
+    let suffix = 2;
+
+    while(entries.some(entry =>
+        entry.id !== currentId &&
+        getEntrySlug(entry) === candidate
+    )){
+        candidate = `${base}-${suffix++}`;
+    }
+
+    return candidate;
+}
+
+function buildEntryUrl(entry){
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.hash = "";
+    url.searchParams.set("entry", getEntrySlug(entry));
+    return url;
+}
+
+function updateUrlForEntry(entry, replace = false){
+    const url = buildEntryUrl(entry);
+    const state = { entrySlug: getEntrySlug(entry) };
+
+    if(replace){
+        history.replaceState(state, "", url);
+    } else if(window.location.href !== url.href){
+        history.pushState(state, "", url);
+    }
+}
+
+function updateUrlForDashboard(replace = false){
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.hash = "";
+
+    if(replace){
+        history.replaceState({ dashboard: true }, "", url);
+    } else if(window.location.href !== url.href){
+        history.pushState({ dashboard: true }, "", url);
+    }
+}
+
+function openEntryFromUrl(){
+    const slug = new URLSearchParams(window.location.search).get("entry");
+    if(!slug) return false;
+
+    const entry = findEntryBySlug(slug);
+    if(!entry) return false;
+
+    openEntryView(entry.id, { updateHistory: false });
+    return true;
+}
+
+window.copyCurrentEntryLink = async function(){
+    const entry = entries.find(item => item.id === currentEntryId);
+    if(!entry) return;
+
+    const url = buildEntryUrl(entry).href;
+
+    try {
+        await navigator.clipboard.writeText(url);
+        alert("Entry link copied to the clipboard.");
+    } catch (error) {
+        window.prompt("Copy this entry link:", url);
+    }
+};
+
+
 
 function stripHtml(html){
     const div = document.createElement("div");
@@ -1424,7 +1518,7 @@ window.setFilter = function(filter){
     showMode("directory");
 };
 
-function openEntryView(id){
+function openEntryView(id, options = {}){
     const entry = entries.find(e => e.id === id);
     if(!entry) return;
 
@@ -1466,6 +1560,12 @@ if(entry.imageUrl){
     }
 
     showMode("view");
+
+    if(options.updateHistory !== false){
+        updateUrlForEntry(entry, options.replaceHistory === true);
+    }
+
+    document.title = `${entry.title || "Untitled"} | Campaign Wiki`;
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -1492,7 +1592,7 @@ window.deleteCurrentEntry = async function () {
 
         currentEntryId = null;
 
-        returnHomeDashboard();
+        returnHomeDashboard({ replaceHistory: true });
 
     } catch (err) {
 
@@ -1537,6 +1637,8 @@ window.openEntryEditor = openEntryEditor;
 
 window.newEntry = function(){
     currentEntryId = "";
+    updateUrlForDashboard(true);
+    document.title = "New Entry | Campaign Wiki";
     els.editingId.value = "";
     els.editHeading.textContent = "Create Entry";
     els.category.value = "NPCs";
@@ -1557,7 +1659,7 @@ window.cancelEdit = function(){
     if(currentEntryId){
         openEntryView(currentEntryId);
     } else {
-        showDirectory();
+        returnHomeDashboard({ replaceHistory: true });
     }
 };
 
@@ -1590,9 +1692,12 @@ window.saveEntry = async function(){
         imageUrl = await getDownloadURL(imageRef);
     }
 
+    const slug = existing?.slug || makeUniqueSlug(title, id);
+
     const data = {
         category: els.category.value,
         title,
+        slug,
         location: els.location.value.trim(),
         content: els.editor.innerHTML,
         textContent: stripHtml(els.editor.innerHTML),
@@ -1609,7 +1714,7 @@ window.saveEntry = async function(){
     els.imageUpload.value = "";
     els.saveStatus.textContent = "Saved ✓";
 
-    setTimeout(() => openEntryView(id), 500);
+    setTimeout(() => openEntryView(id, { replaceHistory: true }), 500);
 };
 
 window.deleteEntry = async function(){
@@ -1758,9 +1863,16 @@ window.syncDashboardSearch = function(value){
 };
 
 
-window.returnHomeDashboard = function(){
+window.returnHomeDashboard = function(options = {}){
+    currentEntryId = "";
     showDirectory();
     hideTypeList();
+
+    if(options.updateHistory !== false){
+        updateUrlForDashboard(options.replaceHistory === true);
+    }
+
+    document.title = "Campaign Wiki";
     window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
@@ -1862,17 +1974,36 @@ let filtered = entries.slice();
     }
 };
 
+let initialEntriesLoaded = false;
+
 onSnapshot(collection(db, "wikiEntries"), snapshot => {
     entries = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     els.firebaseStatus.textContent = "Connected ✓";
     renderEntries();
+
+    if(!initialEntriesLoaded){
+        initialEntriesLoaded = true;
+
+        const requestedSlug = new URLSearchParams(window.location.search).get("entry");
+        if(requestedSlug){
+            if(!openEntryFromUrl()){
+                alert(`No wiki entry was found for "${requestedSlug}".`);
+                returnHomeDashboard({ replaceHistory: true });
+            }
+        } else {
+            renderDirectory();
+            showMode("directory");
+            history.replaceState({ dashboard: true }, "", window.location.href);
+        }
+        return;
+    }
 
     if(currentMode === "directory"){
         renderDirectory();
     }
 
     if(currentEntryId && currentMode === "view"){
-        openEntryView(currentEntryId);
+        openEntryView(currentEntryId, { updateHistory: false });
     }
 }, error => {
     console.error(error);
@@ -1881,7 +2012,23 @@ onSnapshot(collection(db, "wikiEntries"), snapshot => {
 });
 
 setActiveFilterButton();
-showDirectory();
+showMode("directory");
+
+
+window.addEventListener("popstate", () => {
+    const slug = new URLSearchParams(window.location.search).get("entry");
+
+    if(slug){
+        const entry = findEntryBySlug(slug);
+        if(entry){
+            openEntryView(entry.id, { updateHistory: false });
+        } else {
+            returnHomeDashboard({ updateHistory: false });
+        }
+    } else {
+        returnHomeDashboard({ updateHistory: false });
+    }
+});
 
 window.exportWikiData = async function() {
 
