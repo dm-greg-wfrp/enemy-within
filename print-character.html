@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Printable WFRP Character Sheet</title>
+<style>
+  :root {
+    --ink: #111;
+    --line: #333;
+    --shade: #e8e8e8;
+    --paper: #fff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #777;
+    color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background: #222;
+    color: white;
+    font-family: Arial, sans-serif;
+  }
+  .toolbar button {
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    padding: 8px 12px;
+    background: #444;
+    color: white;
+    cursor: pointer;
+  }
+  .status { font-size: 13px; }
+  #pages { padding: 18px 0; }
+  .page {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 0 auto 18px;
+    padding: 0.28in;
+    background: var(--paper);
+    box-shadow: 0 4px 18px rgba(0,0,0,.35);
+    page-break-after: always;
+    overflow: hidden;
+  }
+  .page:last-child { page-break-after: auto; }
+  .sheet-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: .08em;
+    margin: 0 0 5px;
+  }
+  .subtitle {
+    text-align: center;
+    font: 10px Arial, sans-serif;
+    margin-bottom: 5px;
+  }
+  .box {
+    border: 1.5px solid var(--line);
+    margin-bottom: 5px;
+    break-inside: avoid;
+  }
+  .box-title {
+    padding: 3px 5px;
+    border-bottom: 1.5px solid var(--line);
+    background: var(--shade);
+    text-align: center;
+    font-weight: bold;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .grid { display: grid; }
+  .identity { grid-template-columns: 2fr 1fr 1fr; }
+  .identity.secondary { grid-template-columns: 2fr 1fr 1fr 1fr; }
+  .top-stats { grid-template-columns: 2.25fr .9fr 1.2fr 1.15fr; gap: 5px; }
+  .skills-grid { grid-template-columns: 1fr 1fr 1.08fr; gap: 5px; }
+  .bottom-grid { grid-template-columns: 1.2fr 1fr; gap: 5px; }
+  .page2-top { grid-template-columns: 1.6fr .95fr; gap: 5px; }
+  .page2-mid { grid-template-columns: 1.25fr .85fr .9fr; gap: 5px; }
+  .field {
+    min-height: 30px;
+    padding: 3px 5px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .field:last-child { border-right: 0; }
+  .label {
+    display: block;
+    font: 8px Arial, sans-serif;
+    text-transform: uppercase;
+    color: #333;
+    margin-bottom: 2px;
+  }
+  .value {
+    display: block;
+    min-height: 13px;
+    font-size: 11px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: Arial, sans-serif;
+    font-size: 8px;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 2px 3px;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+  th {
+    background: var(--shade);
+    font-size: 7px;
+    text-transform: uppercase;
+  }
+  .box table { border: 0; }
+  .box table tr:first-child th { border-top: 0; }
+  .box table tr:last-child td { border-bottom: 0; }
+  .box table th:first-child, .box table td:first-child { border-left: 0; }
+  .box table th:last-child, .box table td:last-child { border-right: 0; }
+  .characteristics th, .characteristics td { text-align: center; }
+  .characteristics th:first-child, .characteristics td:first-child { text-align: left; width: 48px; }
+  .mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); }
+  .mini-grid.three { grid-template-columns: repeat(3, 1fr); }
+  .mini-field {
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 3px;
+    min-height: 29px;
+    text-align: center;
+  }
+  .mini-field:nth-child(2n) { border-right: 0; }
+  .mini-grid.three .mini-field:nth-child(2n) { border-right: 1px solid var(--line); }
+  .mini-grid.three .mini-field:nth-child(3n) { border-right: 0; }
+  .mini-label { font: 7px Arial, sans-serif; text-transform: uppercase; }
+  .mini-value { font-size: 11px; font-weight: bold; margin-top: 2px; }
+  .text-block {
+    min-height: 54px;
+    padding: 5px;
+    font: 9px/1.25 Arial, sans-serif;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .armour-locations {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .armour-location {
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 5px;
+    min-height: 35px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font: 9px Arial, sans-serif;
+  }
+  .armour-location:nth-child(2n) { border-right: 0; }
+  .ap {
+    border: 1px solid var(--line);
+    min-width: 24px;
+    min-height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  .small-table td { height: 20px; }
+  .continuation-section { margin-bottom: 8px; }
+  .continuation-section h2 {
+    margin: 0;
+    padding: 4px 6px;
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    background: var(--shade);
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+  .hidden { display: none !important; }
+
+  @page { size: Letter portrait; margin: 0; }
+  @media print {
+    body { background: white; }
+    .toolbar { display: none; }
+    #pages { padding: 0; }
+    .page {
+      margin: 0;
+      box-shadow: none;
+      width: 8.5in;
+      height: 11in;
+      min-height: 11in;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button onclick="window.print()">Print / Save as PDF</button>
+  <button onclick="window.close()">Close</button>
+  <span id="status" class="status">Loading character…</span>
+</div>
+
+<div id="pages">
+  <section class="page" id="page1">
+    <div class="sheet-title">WARHAMMER FANTASY ROLEPLAY</div>
+    <div class="subtitle">Printable Character Record</div>
+
+    <div class="box">
+      <div class="grid identity">
+        <div class="field"><span class="label">Name</span><span class="value" data-out="name"></span></div>
+        <div class="field"><span class="label">Species</span><span class="value" data-out="race"></span></div>
+        <div class="field"><span class="label">Class</span><span class="value" data-out="class"></span></div>
+      </div>
+      <div class="grid identity">
+        <div class="field"><span class="label">Career</span><span class="value" data-out="career"></span></div>
+        <div class="field"><span class="label">Career Level</span><span class="value" data-out="careerLevel"></span></div>
+        <div class="field"><span class="label">Status</span><span class="value" data-out="status"></span></div>
+      </div>
+      <div class="grid identity secondary">
+        <div class="field"><span class="label">Career Path</span><span class="value" data-out="careerPath"></span></div>
+        <div class="field"><span class="label">Age</span><span class="value" data-out="age"></span></div>
+        <div class="field"><span class="label">Hair</span><span class="value" data-out="hair"></span></div>
+        <div class="field"><span class="label">Eyes</span><span class="value" data-out="eyes"></span></div>
+      </div>
+    </div>
+
+    <div class="grid top-stats">
+      <div class="box">
+        <div class="box-title">Characteristics</div>
+        <table class="characteristics">
+          <thead><tr><th></th><th>WS</th><th>BS</th><th>S</th><th>T</th><th>I</th><th>Ag</th><th>Dex</th><th>Int</th><th>WP</th><th>Fel</th></tr></thead>
+          <tbody id="characteristicsBody"></tbody>
+        </table>
+      </div>
+      <div class="box">
+        <div class="box-title">Fate</div>
+        <div class="mini-grid">
+          <div class="mini-field"><div class="mini-label">Fate</div><div class="mini-value" data-out="fate"></div></div>
+          <div class="mini-field"><div class="mini-label">Fortune</div><div class="mini-value" data-out="fortune"></div></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="box-title">Resilience</div>
+        <div class="mini-grid">
+          <div class="mini-field"><div class="mini-label">Resilience</div><div class="mini-value" data-out="resilience"></div></div>
+          <div class="mini-field"><div class="mini-label">Resolve</div><div class="mini-value" data-out="resolve"></div></div>
+        </div>
+        <div class="text-block"><b>Motivation:</b> <span data-out="motivation"></span></div>
+      </div>
+      <div class="box">
+        <div class="box-title">Experience</div>
+        <div class="mini-grid three">
+          <div class="mini-field"><div class="mini-label">Current</div><div class="mini-value" data-out="xpCurrent"></div></div>
+          <div class="mini-field"><div class="mini-label">Spent</div><div class="mini-value" data-out="xpSpent"></div></div>
+          <div class="mini-field"><div class="mini-label">Total</div><div class="mini-value" data-out="xpTotal"></div></div>
+        </div>
+        <div class="box-title">Movement</div>
+        <div class="mini-grid three">
+          <div class="mini-field"><div class="mini-label">Move</div><div class="mini-value" data-out="movement"></div></div>
+          <div class="mini-field"><div class="mini-label">Walk</div><div class="mini-value" data-out="walk"></div></div>
+          <div class="mini-field"><div class="mini-label">Run</div><div class="mini-value" data-out="run"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid skills-grid">
+      <div class="box">
+        <div class="box-title">Basic Skills</div>
+        <table><thead><tr><th>Name</th><th>Char</th><th>Adv</th><th>Skill</th></tr></thead><tbody id="basicSkillsA"></tbody></table>
+      </div>
+      <div class="box">
+        <div class="box-title">Basic Skills</div>
+        <table><thead><tr><th>Name</th><th>Char</th><th>Adv</th><th>Skill</th></tr></thead><tbody id="basicSkillsB"></tbody></table>
+      </div>
+      <div class="box">
+        <div class="box-title">Grouped & Advanced Skills</div>
+        <table><thead><tr><th>Name</th><th>Char</th><th>Adv</th><th>Skill</th></tr></thead><tbody id="advancedSkills"></tbody></table>
+      </div>
+    </div>
+
+    <div class="grid bottom-grid">
+      <div class="box">
+        <div class="box-title">Talents</div>
+        <table><thead><tr><th>Talent</th><th>Taken</th><th>Description</th></tr></thead><tbody id="talents"></tbody></table>
+      </div>
+      <div>
+        <div class="box">
+          <div class="box-title">Ambitions</div>
+          <div class="text-block"><b>Short-term:</b> <span data-out="shortAmbition"></span></div>
+          <div class="text-block"><b>Long-term:</b> <span data-out="longAmbition"></span></div>
+        </div>
+        <div class="box">
+          <div class="box-title">Personal Details</div>
+          <div class="text-block"><b>Gender:</b> <span data-out="gender"></span><br>
+          <b>Height:</b> <span data-out="height"></span> &nbsp; <b>Weight:</b> <span data-out="weight"></span><br>
+          <b>Birthplace:</b> <span data-out="birthplace"></span><br>
+          <b>Star Sign:</b> <span data-out="starSign"></span><br>
+          <b>Marks:</b> <span data-out="marks"></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="page2">
+    <div class="sheet-title">WARHAMMER FANTASY ROLEPLAY</div>
+    <div class="subtitle"><span data-out="name"></span> — Equipment and Record</div>
+
+    <div class="grid page2-top">
+      <div>
+        <div class="box">
+          <div class="box-title">Armour</div>
+          <table><thead><tr><th>Name</th><th>Enc</th><th>AP</th><th>Locations</th><th>Qualities / Flaws</th></tr></thead><tbody id="armour"></tbody></table>
+        </div>
+        <div class="box">
+          <div class="box-title">Trappings</div>
+          <table><thead><tr><th>Name</th><th>Enc</th><th>Description</th></tr></thead><tbody id="trappings"></tbody></table>
+        </div>
+      </div>
+      <div class="box">
+        <div class="box-title">Armour Points</div>
+        <div class="armour-locations">
+          <div class="armour-location">Head <span class="ap" data-out="armourHead"></span></div>
+          <div class="armour-location">Body <span class="ap" data-out="armourBody"></span></div>
+          <div class="armour-location">Right Arm <span class="ap" data-out="armourRightArm"></span></div>
+          <div class="armour-location">Left Arm <span class="ap" data-out="armourLeftArm"></span></div>
+          <div class="armour-location">Right Leg <span class="ap" data-out="armourRightLeg"></span></div>
+          <div class="armour-location">Left Leg <span class="ap" data-out="armourLeftLeg"></span></div>
+          <div class="armour-location">Shield <span class="ap" data-out="shieldBonus"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid page2-mid">
+      <div class="box">
+        <div class="box-title">Psychology</div>
+        <table><thead><tr><th>Type</th><th>Description</th></tr></thead><tbody id="psychology"></tbody></table>
+      </div>
+      <div>
+        <div class="box">
+          <div class="box-title">Corruption & Mutation</div>
+          <div class="mini-grid">
+            <div class="mini-field"><div class="mini-label">Current</div><div class="mini-value" data-out="corruptionCurrent"></div></div>
+            <div class="mini-field"><div class="mini-label">Maximum</div><div class="mini-value" data-out="corruptionMax"></div></div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="box-title">Wealth</div>
+          <div class="mini-grid three">
+            <div class="mini-field"><div class="mini-label">GC</div><div class="mini-value" data-out="gold"></div></div>
+            <div class="mini-field"><div class="mini-label">SS</div><div class="mini-value" data-out="shillings"></div></div>
+            <div class="mini-field"><div class="mini-label">BP</div><div class="mini-value" data-out="pennies"></div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="box">
+          <div class="box-title">Encumbrance</div>
+          <div class="mini-grid">
+            <div class="mini-field"><div class="mini-label">Maximum</div><div class="mini-value" data-out="totalEnc"></div></div>
+            <div class="mini-field"><div class="mini-label">Current</div><div class="mini-value" data-out="maxEnc"></div></div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="box-title">Wounds</div>
+          <div class="mini-grid">
+            <div class="mini-field"><div class="mini-label">Current</div><div class="mini-value" data-out="currentWounds"></div></div>
+            <div class="mini-field"><div class="mini-label">Critical</div><div class="mini-value" data-out="criticalWounds"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">Weapons</div>
+      <table><thead><tr><th>Name</th><th>Group</th><th>1H/2H</th><th>Enc</th><th>Reach / Range</th><th>Damage</th><th>Qualities / Flaws</th></tr></thead><tbody id="weapons"></tbody></table>
+    </div>
+
+    <div class="box">
+      <div class="box-title">Spells and Prayers</div>
+      <table><thead><tr><th>Name</th><th>CN</th><th>Range</th><th>Target</th><th>Duration</th><th>Effect</th></tr></thead><tbody id="spells"></tbody></table>
+    </div>
+
+    <div class="box">
+      <div class="box-title">Notes</div>
+      <div class="text-block" data-out="notes"></div>
+    </div>
+  </section>
+
+  <section class="page hidden" id="continuationPage">
+    <div class="sheet-title">WARHAMMER FANTASY ROLEPLAY</div>
+    <div class="subtitle"><span data-out="name"></span> — Continuation</div>
+    <div id="continuationContent"></div>
+  </section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAIZ1hiLFV60z4feJv0wC48dTrvApjuqjQ",
+  authDomain: "wfrp-enemy-within.firebaseapp.com",
+  projectId: "wfrp-enemy-within",
+  storageBucket: "wfrp-enemy-within.firebasestorage.app",
+  messagingSenderId: "349261927044",
+  appId: "1:349261927044:web:b7bec0a8eb665ef5bf68d1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const CLOUD_COLLECTION = "characters";
+
+const defaultBasicSkills = [
+  ["Art","Dex"],["Athletics","Agi"],["Bribery","Fel"],["Charm","Fel"],
+  ["Charm Animal","WP"],["Climb","S"],["Cool","WP"],["Consume Alcohol","T"],
+  ["Dodge","Agi"],["Drive","Agi"],["Endurance","T"],["Entertain","Fel"],
+  ["Gamble","Int"],["Gossip","Fel"],["Haggle","Fel"],["Intimidate","S"],
+  ["Intuition","I"],["Leadership","Fel"],["Melee","WS"],["Navigation","I"],
+  ["Outdoor Survival","Int"],["Perception","I"],["Ride","Agi"],["Row","S"],["Stealth","Agi"]
+];
+
+function getCharacterId() {
+  const params = new URLSearchParams(window.location.search);
+  return (params.get("id") || params.get("character") || "dave")
+    .toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+}
+
+const CHARACTER_ID = getCharacterId();
+const STORAGE_KEY = `wfrp-character-sheet-${CHARACTER_ID}`;
+
+function value(data, key, fallback = "") {
+  const result = data?.[key];
+  return result === undefined || result === null ? fallback : result;
+}
+function number(data, key) {
+  const n = Number(value(data, key, 0));
+  return Number.isFinite(n) ? n : 0;
+}
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+function textFromHtml(html) {
+  const div = document.createElement("div");
+  div.innerHTML = html || "";
+  return div.textContent || div.innerText || "";
+}
+function fillOutputs(data) {
+  document.querySelectorAll("[data-out]").forEach(el => {
+    const key = el.dataset.out;
+    const raw = key === "notes" ? textFromHtml(value(data, key, "")) : value(data, key, "");
+    el.textContent = raw;
+  });
+}
+
+function buildCharacteristics(data) {
+  const stats = ["WS","BS","S","T","I","Agi","Dex","Int","WP","Fel"];
+  const labels = ["Starting","Advances","Current"];
+  const prefixes = ["char","adv","cur"];
+  const body = document.getElementById("characteristicsBody");
+  body.innerHTML = labels.map((label, rowIndex) => {
+    const cells = stats.map(stat => {
+      let output = value(data, `${prefixes[rowIndex]}${stat}`, "");
+      if (rowIndex === 2 && output === "") {
+        output = number(data, `char${stat}`) + number(data, `adv${stat}`);
+      }
+      return `<td>${escapeHtml(output)}</td>`;
+    }).join("");
+    return `<tr><td><b>${label}</b></td>${cells}</tr>`;
+  }).join("");
+}
+
+function skillRow(name, characteristic, advances, total, notes = "") {
+  const label = notes ? `${name} (${notes})` : name;
+  return `<tr><td>${escapeHtml(label)}</td><td>${escapeHtml(characteristic)}</td><td>${escapeHtml(advances)}</td><td>${escapeHtml(total)}</td></tr>`;
+}
+function buildSkills(data) {
+  const basic = defaultBasicSkills.map(([name, char], i) => {
+    const adv = number(data, `basicSkills_${i}_adv`);
+    const total = value(data, `basicSkills_${i}_total`, number(data, `cur${char}`) + adv);
+    return {name, char, adv, total, notes: value(data, `basicSkills_${i}_notes`, "")};
+  });
+  (data._customBasicSkills || []).forEach((skill, i) => {
+    const prefix = `basicSkills_custom_${i}`;
+    const char = value(data, `${prefix}_char`, skill.characteristic || "");
+    const adv = number(data, `${prefix}_adv`) || Number(skill.advances || 0);
+    const total = value(data, `${prefix}_total`, number(data, `cur${char}`) + adv);
+    basic.push({
+      name: value(data, `${prefix}_name`, skill.name || ""),
+      char, adv, total,
+      notes: value(data, `${prefix}_notes`, skill.notes || "")
+    });
+  });
+
+  const advanced = (data._advancedSkills || []).map((skill, i) => {
+    const prefix = `advancedSkills_custom_${i}`;
+    const char = value(data, `${prefix}_char`, skill.characteristic || "");
+    const adv = number(data, `${prefix}_adv`) || Number(skill.advances || 0);
+    return {
+      name: value(data, `${prefix}_name`, skill.name || ""),
+      char, adv,
+      total: value(data, `${prefix}_total`, number(data, `cur${char}`) + adv),
+      notes: value(data, `${prefix}_notes`, skill.notes || "")
+    };
+  });
+
+  const first = basic.slice(0, 13);
+  const second = basic.slice(13, 26);
+  document.getElementById("basicSkillsA").innerHTML = first.map(s => skillRow(s.name,s.char,s.adv,s.total,s.notes)).join("");
+  document.getElementById("basicSkillsB").innerHTML = second.map(s => skillRow(s.name,s.char,s.adv,s.total,s.notes)).join("");
+  document.getElementById("advancedSkills").innerHTML = advanced.slice(0, 12).map(s => skillRow(s.name,s.char,s.adv,s.total,s.notes)).join("");
+
+  return { basicOverflow: basic.slice(26), advancedOverflow: advanced.slice(12) };
+}
+
+function collectFixedTable(data, prefix, rows, cols) {
+  const result = [];
+  for (let r = 0; r < rows; r++) {
+    const row = [];
+    for (let c = 0; c < cols; c++) row.push(value(data, `${prefix}_${r}_${c}`, ""));
+    if (row.some(cell => String(cell).trim() !== "")) result.push(row);
+  }
+  return result;
+}
+function renderRows(id, rows, limit, combineLast = false) {
+  const visible = rows.slice(0, limit);
+  document.getElementById(id).innerHTML = visible.map(row => {
+    let cells = row;
+    if (combineLast && row.length >= 8) {
+      cells = row.slice(0,6).concat([[row[6], row[7]].filter(Boolean).join("; ")]);
+    }
+    return `<tr>${cells.map(cell => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`;
+  }).join("");
+  return rows.slice(limit);
+}
+function buildWeapons(data) {
+  const names = data._selectedWeapons || [];
+  const rows = names.map((name, i) => [
+    value(data, `weapons_${i}_weapon`, name),
+    value(data, `weapons_${i}_group`, ""),
+    value(data, `weapons_${i}_hands`, ""),
+    value(data, `weapons_${i}_enc`, ""),
+    value(data, `weapons_${i}_reach`, ""),
+    value(data, `weapons_${i}_damage`, ""),
+    value(data, `weapons_${i}_qualities`, ""),
+    value(data, `weapons_${i}_flaws`, "")
+  ]).filter(row => row.some(cell => String(cell).trim() !== ""));
+  return renderRows("weapons", rows, 7, true);
+}
+
+function sectionTable(title, headers, rows) {
+  if (!rows.length) return "";
+  return `<div class="continuation-section"><h2>${escapeHtml(title)}</h2><table><thead><tr>${headers.map(h=>`<th>${escapeHtml(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map(c=>`<td>${escapeHtml(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+
+function addBlankRows(id, minimum, columns) {
+  const body = document.getElementById(id);
+  const existing = body.querySelectorAll("tr").length;
+  for (let i = existing; i < minimum; i++) {
+    body.insertAdjacentHTML("beforeend", `<tr>${Array.from({length: columns},()=>"<td>&nbsp;</td>").join("")}</tr>`);
+  }
+}
+
+function renderSheet(data) {
+  // Recalculate common derived fields when older saves omit them.
+  const stats = ["WS","BS","S","T","I","Agi","Dex","Int","WP","Fel"];
+  stats.forEach(stat => {
+    if (value(data, `cur${stat}`, "") === "") data[`cur${stat}`] = number(data, `char${stat}`) + number(data, `adv${stat}`);
+  });
+  if (value(data, "walk", "") === "") data.walk = number(data, "movement") * 2;
+  if (value(data, "run", "") === "") data.run = number(data, "movement") * 4;
+  if (value(data, "xpTotal", "") === "") data.xpTotal = number(data, "xpCurrent") + number(data, "xpSpent");
+  if (value(data, "corruptionMax", "") === "") data.corruptionMax = Math.floor(number(data,"curWP")/10) + Math.floor(number(data,"curT")/10);
+
+  fillOutputs(data);
+  buildCharacteristics(data);
+  const skillOverflow = buildSkills(data);
+
+  const talents = collectFixedTable(data, "talentsTable", 13, 3);
+  const armour = collectFixedTable(data, "armourTable", 6, 5);
+  const trappings = collectFixedTable(data, "trappingsTable", 15, 3);
+  const psychology = collectFixedTable(data, "psychologyTable", 8, 2);
+  const spells = collectFixedTable(data, "spellsTable", 9, 6);
+
+  const talentOverflow = renderRows("talents", talents, 8);
+  const armourOverflow = renderRows("armour", armour, 6);
+  const trappingOverflow = renderRows("trappings", trappings, 10);
+  const psychOverflow = renderRows("psychology", psychology, 4);
+  const spellOverflow = renderRows("spells", spells, 7);
+  const weaponOverflow = buildWeapons(data);
+
+  addBlankRows("talents", 8, 3);
+  addBlankRows("armour", 6, 5);
+  addBlankRows("trappings", 10, 3);
+  addBlankRows("psychology", 4, 2);
+  addBlankRows("weapons", 7, 7);
+  addBlankRows("spells", 7, 6);
+  addBlankRows("basicSkillsA", 13, 4);
+  addBlankRows("basicSkillsB", 13, 4);
+  addBlankRows("advancedSkills", 12, 4);
+
+  const continuation = [];
+  continuation.push(sectionTable("Additional Basic Skills", ["Name","Char","Adv","Skill"],
+    skillOverflow.basicOverflow.map(s => [s.notes ? `${s.name} (${s.notes})` : s.name,s.char,s.adv,s.total])));
+  continuation.push(sectionTable("Additional Advanced Skills", ["Name","Char","Adv","Skill"],
+    skillOverflow.advancedOverflow.map(s => [s.notes ? `${s.name} (${s.notes})` : s.name,s.char,s.adv,s.total])));
+  continuation.push(sectionTable("Additional Talents", ["Talent","Taken","Description"], talentOverflow));
+  continuation.push(sectionTable("Additional Armour", ["Name","Enc","AP","Locations","Qualities / Flaws"], armourOverflow));
+  continuation.push(sectionTable("Additional Trappings", ["Name","Enc","Description"], trappingOverflow));
+  continuation.push(sectionTable("Additional Psychology", ["Type","Description"], psychOverflow));
+  continuation.push(sectionTable("Additional Weapons", ["Name","Group","1H/2H","Enc","Reach / Range","Damage","Qualities / Flaws"],
+    weaponOverflow.map(row => row.slice(0,6).concat([[row[6],row[7]].filter(Boolean).join("; ")]))));
+  continuation.push(sectionTable("Additional Spells and Prayers", ["Name","CN","Range","Target","Duration","Effect"], spellOverflow));
+
+  const content = continuation.filter(Boolean).join("");
+  if (content) {
+    document.getElementById("continuationContent").innerHTML = content;
+    document.getElementById("continuationPage").classList.remove("hidden");
+  }
+
+  document.title = `${value(data,"name","Character")} — Printable Character Sheet`;
+  document.getElementById("status").textContent = `Loaded ${value(data,"name",CHARACTER_ID)}.`;
+}
+
+async function loadCharacter() {
+  let data = null;
+  try {
+    const doc = await db.collection(CLOUD_COLLECTION).doc(CHARACTER_ID).get();
+    if (doc.exists) data = doc.data();
+  } catch (error) {
+    console.warn("Cloud load failed; trying browser backup.", error);
+  }
+  if (!data) {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try { data = JSON.parse(saved); } catch (error) {}
+    }
+  }
+  if (!data) {
+    document.getElementById("status").textContent = `No saved character found for "${CHARACTER_ID}".`;
+    return;
+  }
+  renderSheet(data);
+}
+loadCharacter();
+</script>
+</body>
+</html>
