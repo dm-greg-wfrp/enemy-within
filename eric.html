@@ -449,7 +449,8 @@
         <button onclick="exportSheet()">Export JSON</button>
         <label class="file-label">Import JSON<input type="file" accept="application/json" onchange="importSheet(event)"></label>
         <button onclick="clearSheet()">Clear</button>
-        <button onclick="window.print()">Print</button>
+        <button onclick="openPrintableSheet()">Printable Character Sheet</button>
+        <button onclick="window.print()">Print Web Page</button>
       </div>
       <div class="header-meta">
         <div id="status" class="status">Ready</div>
@@ -2607,6 +2608,12 @@
       setStatus("Loaded browser backup.", "saved-ok");
 
       showSheetAfterLoad();
+    }
+
+    async function openPrintableSheet() {
+      await saveSheet({ silent: true });
+      const url = `print-character.html?id=${encodeURIComponent(CHARACTER_ID)}`;
+      window.open(url, "_blank", "noopener");
     }
 
     function exportSheet() {
